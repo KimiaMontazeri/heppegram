@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
+  Center,
   FormControl,
   FormLabel,
   Heading,
@@ -48,41 +49,43 @@ function Login() {
   };
 
   return (
-    <Stack align='center' width='450px'>
-      <Heading as='h1' size='xl'>
-        Hi, Welcome Back! 👋
-      </Heading>
-      <Text pb={4}>Hello again, you've been missed!</Text>
-      <form>
-        <Stack width='300px'>
-          <FormControl isRequired>
-            <FormLabel>Username</FormLabel>
-            <Input
-              value={username}
-              isInvalid={isUsernameInvalid}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder='Enter your username'
-            />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel>Password</FormLabel>
-            <Input
-              value={password}
-              isInvalid={isPasswordValid}
-              onChange={(e) => setPassword(e.target.value)}
-              type='password'
-              placeholder='Enter your password'
-            />
-          </FormControl>
-          <Button type='submit' onClick={handleSubmit}>
-            Continue
-          </Button>
-          <Button variant='outline' onClick={handleClickOnSignup}>
-            Don't have an account?
-          </Button>
-        </Stack>
-      </form>
-    </Stack>
+    <Center>
+      <Stack align='center' width='450px'>
+        <Heading as='h1' size='xl'>
+          Hi, Welcome Back! 👋
+        </Heading>
+        <Text pb={4}>Hello again, you've been missed!</Text>
+        <form>
+          <Stack width='300px'>
+            <FormControl isRequired>
+              <FormLabel>Username</FormLabel>
+              <Input
+                value={username}
+                isInvalid={isUsernameInvalid}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder='Enter your username'
+              />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Password</FormLabel>
+              <Input
+                value={password}
+                isInvalid={isPasswordValid}
+                onChange={(e) => setPassword(e.target.value)}
+                type='password'
+                placeholder='Enter your password'
+              />
+            </FormControl>
+            <Button type='submit' onClick={handleSubmit}>
+              Continue
+            </Button>
+            <Button variant='outline' onClick={handleClickOnSignup}>
+              Don't have an account?
+            </Button>
+          </Stack>
+        </form>
+      </Stack>
+    </Center>
   );
 }
 
