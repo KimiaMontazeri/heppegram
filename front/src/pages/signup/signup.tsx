@@ -12,8 +12,8 @@ import {
   Text,
   useSteps,
 } from '@chakra-ui/react';
-import FirstStep from './components/FirstStep';
-import SecondStep from './components/SecondStep';
+import FirstStep from './components/first-step';
+import SecondStep from './components/second-step';
 
 const STEPS = [{ title: 'Username & Password' }, { title: 'Account Info' }];
 
