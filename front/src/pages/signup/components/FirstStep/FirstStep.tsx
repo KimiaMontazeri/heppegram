@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Button,
   FormControl,
@@ -6,9 +8,9 @@ import {
   Input,
   Stack,
 } from '@chakra-ui/react';
-import { useState } from 'react';
 
 const FirstStep = ({ handleContinue }: { handleContinue: () => void }) => {
+  const navigate = useNavigate();
   // username
   const [username, setUsername] = useState('');
   const [isUsernameInvalid, setIsUsernameInvalid] = useState(false);
@@ -17,6 +19,10 @@ const FirstStep = ({ handleContinue }: { handleContinue: () => void }) => {
   // password
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(false);
+
+  const handleClickOnLogin = () => {
+    navigate('/login');
+  };
 
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
@@ -61,7 +67,9 @@ const FirstStep = ({ handleContinue }: { handleContinue: () => void }) => {
         <Button type='submit' onClick={handleSubmit}>
           Continue
         </Button>
-        <Button variant='outline'>Already have an account?</Button>
+        <Button variant='outline' onClick={handleClickOnLogin}>
+          Already have an account?
+        </Button>
       </Stack>
     </form>
   );
