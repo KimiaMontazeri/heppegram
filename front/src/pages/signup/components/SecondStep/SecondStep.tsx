@@ -6,10 +6,12 @@ import {
   Input,
   Stack,
   Textarea,
+  useToast,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 
 const SecondStep = ({ handleContinue }: { handleContinue: () => void }) => {
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
 
   const [firstname, setFirstname] = useState('');
@@ -25,12 +27,21 @@ const SecondStep = ({ handleContinue }: { handleContinue: () => void }) => {
   const [photo, setPhoto] = useState<File | null>();
 
   const handleSubmit = (e: MouseEvent) => {
+    let toastTitle;
     e.preventDefault();
     setLoading(true);
 
     setIsFirstnameInvalid(!firstname);
     setIsLastnameInvalid(!lastname);
-    setIsPhoneInvalid(!phone || !phone.startsWith('09') || phone.length !== 11);
+
+    const phoneInvalid =
+      !phone || !phone.startsWith('09') || phone.length !== 11;
+    setIsPhoneInvalid(phoneInvalid);
+    if (!phone.startsWith('09')) {
+      toastTitle = 'Phone number should start with 09!';
+    } else if (phone.length !== 11) {
+      toastTitle = 'Phone number should be 11 digits!';
+    }
 
     const shouldReturn =
       !firstname ||
@@ -40,6 +51,12 @@ const SecondStep = ({ handleContinue }: { handleContinue: () => void }) => {
       phone.length !== 11;
     if (shouldReturn) {
       setLoading(false);
+      toast({
+        title: toastTitle || 'Please enter the correct info!',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
       return;
     }
 
@@ -47,6 +64,13 @@ const SecondStep = ({ handleContinue }: { handleContinue: () => void }) => {
 
     setTimeout(() => {
       setLoading(false);
+      // if ok
+      toast({
+        title: 'Account created.',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
       handleContinue();
     }, 2000);
   };

@@ -7,10 +7,12 @@ import {
   FormLabel,
   Input,
   Stack,
+  useToast,
 } from '@chakra-ui/react';
 
 const FirstStep = ({ handleContinue }: { handleContinue: () => void }) => {
   const navigate = useNavigate();
+  const toast = useToast();
   // username
   const [username, setUsername] = useState('');
   const [isUsernameInvalid, setIsUsernameInvalid] = useState(false);
@@ -27,11 +29,24 @@ const FirstStep = ({ handleContinue }: { handleContinue: () => void }) => {
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
 
-    setIsUsernameInvalid(!username);
-    setIsPasswordValid(!password || password.length < 6);
+    let toastTitle;
+    const passwordLengthOk = password.length >= 6;
 
-    const shouldReturn = !username || !password || password.length < 6;
+    if (!passwordLengthOk) {
+      toastTitle = 'Password should be at least 6 characters!';
+    }
+
+    setIsUsernameInvalid(!username);
+    setIsPasswordValid(!password || !passwordLengthOk);
+
+    const shouldReturn = !username || !password || !passwordLengthOk;
     if (shouldReturn) {
+      toast({
+        title: toastTitle || 'Please enter the correct info!',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
       return;
     }
 
