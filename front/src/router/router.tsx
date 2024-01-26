@@ -1,5 +1,5 @@
 import { Outlet, createBrowserRouter } from 'react-router-dom';
-import Login from '../pages/login';
+import Signup from '../pages/signup';
 import Home from '../pages/home';
 import { TokenGuard } from './guards/token-guard';
 
@@ -24,12 +24,12 @@ export const router = createBrowserRouter([
     ],
   },
   // unauthorized paths
-  {
-    path: '/login',
-    element: <Login />,
-  },
   // {
-  //   path: '/register',
-  //   element:
+  //   path: '/login',
+  //   element: <Login />,
   // },
+  {
+    path: '/signup',
+    element: <Signup />,
+  },
 ]);
