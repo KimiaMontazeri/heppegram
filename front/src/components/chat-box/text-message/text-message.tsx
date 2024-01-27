@@ -1,9 +1,15 @@
 import type { ReactNode } from 'react';
-import { Box } from '@chakra-ui/react';
+import { Box, useColorModeValue } from '@chakra-ui/react';
 
 const TextMessage = ({ children }: { children: ReactNode }) => {
   return (
-    <Box bgColor='ButtonFace' borderRadius='lg' p={2} px={3} textAlign='start'>
+    <Box
+      bgColor={useColorModeValue('gray.100', 'gray.700')}
+      borderRadius='lg'
+      p={2}
+      px={3}
+      textAlign='start'
+    >
       {children}
     </Box>
   );
