@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { EditIcon, SearchIcon } from '@chakra-ui/icons';
 import {
   Box,
@@ -8,14 +9,32 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Portal,
   Stack,
   useColorModeValue,
 } from '@chakra-ui/react';
+import SearchContactModal from '../search-contact-modal';
+import CreateGroupModal from '../create-group-modal';
 import ChatItem from './chat-item';
 
 const ChatList = () => {
+  const [searchContactModalOpen, setSearchContactModalOpen] = useState(false);
+  const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   return (
     <Box px={4}>
+      <SearchContactModal
+        isOpen={searchContactModalOpen}
+        onClose={() => setSearchContactModalOpen(false)}
+      />
+      <CreateGroupModal
+        isOpen={createGroupModalOpen}
+        onClose={() => setCreateGroupModalOpen(false)}
+      />
+
       <Stack
         position='sticky'
         top={0}
@@ -28,13 +47,25 @@ const ChatList = () => {
           <Heading as='h2' size='lg'>
             Messages
           </Heading>
-          <IconButton
-            icon={<EditIcon />}
-            size='sm'
-            isRound
-            aria-label='new-message'
-            shadow='xl'
-          />
+          <Menu>
+            <MenuButton
+              as={IconButton}
+              aria-label='Options'
+              icon={<EditIcon />}
+              shadow='xl'
+              isRound
+            />
+            <Portal>
+              <MenuList>
+                <MenuItem onClick={() => setSearchContactModalOpen(true)}>
+                  Add a new contact
+                </MenuItem>
+                <MenuItem onClick={() => setCreateGroupModalOpen(true)}>
+                  Add a new group
+                </MenuItem>
+              </MenuList>
+            </Portal>
+          </Menu>
         </Flex>
         <Divider />
         <InputGroup variant='filled'>
