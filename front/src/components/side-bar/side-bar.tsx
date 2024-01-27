@@ -12,7 +12,12 @@ const SideBar = () => {
 
   const colorModeIcon = colorMode === 'light' ? <MoonIcon /> : <SunIcon />;
   return (
-    <Stack alignItems='center' py={4} justifyItems='center'>
+    <Stack
+      alignItems='center'
+      py={4}
+      justifyContent='space-between'
+      height='100vh'
+    >
       <Avatar
         name='Dan Abrahmov'
         src='https://bit.ly/dan-abramov'
@@ -24,8 +29,7 @@ const SideBar = () => {
         icon={colorModeIcon}
         aria-label='toggle-mode'
         onClick={toggleColorMode}
-        variant='ghost'
-        color='ButtonText'
+        isRound
       />
     </Stack>
   );
