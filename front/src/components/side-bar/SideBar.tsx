@@ -5,8 +5,6 @@ import {
   IconButton,
   Menu,
   MenuButton,
-  MenuItem,
-  MenuList,
   Portal,
   Stack,
   useColorMode,
@@ -14,7 +12,7 @@ import {
 import ProfileModal from '../profile-modal';
 import { useState } from 'react';
 
-const SideBar = () => {
+export const SideBar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
@@ -44,14 +42,23 @@ const SideBar = () => {
         </MenuButton>
         <Portal>
           <MenuList>
-            <MenuItem onClick={() => setProfileModalOpen(true)}>
-              Open profile
+            <MenuItem onClick={() => setSearchContactModalOpen(true)}>
+              Add a new contact
             </MenuItem>
-            <MenuItem>Logout</MenuItem>
-            <MenuItem>Delete account</MenuItem>
+            <MenuItem onClick={() => setCreateGroupModalOpen(true)}>
+              Add a new group
+            </MenuItem>
           </MenuList>
         </Portal>
       </Menu>
+      {/* <Avatar
+              name='Dan Abrahmov'
+              src='https://bit.ly/dan-abramov'
+              style={{ cursor: 'pointer' }}
+              onClick={() => setProfileModalOpen(true)}
+            >
+              <AvatarBadge boxSize='1em' bg='green.500' />
+            </Avatar> */}
       <IconButton
         icon={colorModeIcon}
         aria-label='toggle-mode'
@@ -61,5 +68,3 @@ const SideBar = () => {
     </Stack>
   );
 };
-
-export default SideBar;
