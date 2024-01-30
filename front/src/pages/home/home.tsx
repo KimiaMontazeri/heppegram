@@ -24,8 +24,16 @@ function Home() {
       <Stack flexGrow={2}>
         <ChatBox />
       </Stack>
-      <Stack bgColor='papayawhip' flexGrow={1}>
-        <ChatDetails />
+      <Divider orientation='vertical' />
+      <Stack flexGrow={1}>
+        <ChatDetails
+          name='Kent Dodds'
+          image='https://bit.ly/kent-c-dodds'
+          isOnline
+          username='@kentdodds'
+          phone='09123484996'
+          bio='I`m so cool!'
+        />
       </Stack>
     </Stack>
   );
