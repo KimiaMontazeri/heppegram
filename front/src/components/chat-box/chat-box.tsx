@@ -14,6 +14,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import MessageGroup from './message-group';
+import ChatSettings from './chat-settings';
 
 const ChatBox = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -35,11 +36,14 @@ const ChatBox = () => {
         top={0}
         bgColor={useColorModeValue('BlackAlpha.50', 'BlackAlpha.50')}
       >
-        <Flex alignItems='center' gap={2} py={4}>
-          <Avatar name='Kent Dodds' src='https://bit.ly/kent-c-dodds' />
-          <Heading as='h2' size='md'>
-            Kent Dodds
-          </Heading>
+        <Flex justify='space-between' align='center'>
+          <Flex alignItems='center' gap={2} py={4}>
+            <Avatar name='Kent Dodds' src='https://bit.ly/kent-c-dodds' />
+            <Heading as='h2' size='md'>
+              Kent Dodds
+            </Heading>
+          </Flex>
+          <ChatSettings />
         </Flex>
         <Divider />
       </Box>
