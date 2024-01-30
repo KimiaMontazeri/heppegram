@@ -13,10 +13,12 @@ import {
 } from '@chakra-ui/react';
 import ProfileModal from '../profile-modal';
 import { useState } from 'react';
+import ContactsModal from '../contacts-modal';
 
 const SideBar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [contactsModalOpen, setContactsModalOpen] = useState(false);
 
   const colorModeIcon = colorMode === 'light' ? <MoonIcon /> : <SunIcon />;
   return (
@@ -29,6 +31,10 @@ const SideBar = () => {
       <ProfileModal
         isOpen={profileModalOpen}
         onClose={() => setProfileModalOpen(false)}
+      />
+      <ContactsModal
+        isOpen={contactsModalOpen}
+        onClose={() => setContactsModalOpen(false)}
       />
 
       <Menu>
@@ -46,6 +52,9 @@ const SideBar = () => {
           <MenuList>
             <MenuItem onClick={() => setProfileModalOpen(true)}>
               Open profile
+            </MenuItem>
+            <MenuItem onClick={() => setContactsModalOpen(true)}>
+              Open contacts list
             </MenuItem>
             <MenuItem>Logout</MenuItem>
             <MenuItem>Delete account</MenuItem>

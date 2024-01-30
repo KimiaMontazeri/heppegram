@@ -8,9 +8,9 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { GroupDetailsProps } from './group-details.types';
-import GroupMember from './group-member';
 import AddMemberModal from './add-member-modal';
 import { useState } from 'react';
+import Person from '../person';
 
 const GroupDetails = ({ groupName, groupImage }: GroupDetailsProps) => {
   const [addMemberModalVisibility, setAddMemberModalVisibility] =
@@ -36,14 +36,14 @@ const GroupDetails = ({ groupName, groupImage }: GroupDetailsProps) => {
         m={4}
         overflow='scroll'
       >
-        <GroupMember
+        <Person
           name='Dan Abrahmov'
           username='@dan123'
           image='https://bit.ly/dan-abramov'
           isOnline
         />
-        <GroupMember isOnline name='Kimia Montazeri' username='@kimimtz' />
-        <GroupMember name='Farhad Aman' username='@farhad' />
+        <Person isOnline name='Kimia Montazeri' username='@kimimtz' />
+        <Person name='Farhad Aman' username='@farhad' />
         <Button
           variant='ghost'
           colorScheme='grey'

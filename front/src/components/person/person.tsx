@@ -8,10 +8,10 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { GroupMemberProps } from './group-member.types';
+import type { PersonProps } from './person.types';
 import { MinusIcon } from '@chakra-ui/icons';
 
-const GroupMember = ({ name, username, image, isOnline }: GroupMemberProps) => {
+const Person = ({ name, username, image, isOnline }: PersonProps) => {
   const grayTextColor = useColorModeValue('gray.500', 'gray.300');
   return (
     <Flex justify='space-between' align='center'>
@@ -19,9 +19,9 @@ const GroupMember = ({ name, username, image, isOnline }: GroupMemberProps) => {
         <Avatar size='sm' name={name} src={image}>
           {isOnline ? (
             <AvatarBadge boxSize='1em' bg='green.500' />
-          ) : (
+          ) : isOnline === false ? (
             <AvatarBadge boxSize='1em' bg='red.500' />
-          )}
+          ) : null}
         </Avatar>
         <Stack gap={0}>
           <Text>{name}</Text>
@@ -30,7 +30,7 @@ const GroupMember = ({ name, username, image, isOnline }: GroupMemberProps) => {
           </Text>
         </Stack>
       </Flex>
-      <Tooltip label='Remove from group'>
+      <Tooltip label='Remove'>
         <IconButton
           icon={<MinusIcon />}
           colorScheme='red'
@@ -43,4 +43,4 @@ const GroupMember = ({ name, username, image, isOnline }: GroupMemberProps) => {
   );
 };
 
-export default GroupMember;
+export default Person;

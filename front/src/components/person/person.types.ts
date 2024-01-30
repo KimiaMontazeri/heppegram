@@ -1,4 +1,4 @@
-export type GroupMemberProps = {
+export type PersonProps = {
   name: string;
   username: string;
   image?: string;
