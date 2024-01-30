@@ -14,6 +14,7 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
+    "chakra-ui-contextmenu": "^1.0.5",
     "framer-motion": "^11.0.3",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.3",
