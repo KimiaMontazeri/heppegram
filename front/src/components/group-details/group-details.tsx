@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Button,
   Center,
   List,
   Stack,
@@ -8,10 +9,20 @@ import {
 } from '@chakra-ui/react';
 import { GroupDetailsProps } from './group-details.types';
 import GroupMember from './group-member';
+import AddMemberModal from './add-member-modal';
+import { useState } from 'react';
 
 const GroupDetails = ({ groupName, groupImage }: GroupDetailsProps) => {
+  const [addMemberModalVisibility, setAddMemberModalVisibility] =
+    useState(false);
+
   return (
     <Stack alignItems='stretch' alignContent='center' height='100vh' py={4}>
+      <AddMemberModal
+        isOpen={addMemberModalVisibility}
+        onClose={() => setAddMemberModalVisibility(false)}
+      />
+
       <Center>
         <Avatar size='2xl' name={groupName} src={groupImage} />
       </Center>
@@ -33,6 +44,13 @@ const GroupDetails = ({ groupName, groupImage }: GroupDetailsProps) => {
         />
         <GroupMember isOnline name='Kimia Montazeri' username='@kimimtz' />
         <GroupMember name='Farhad Aman' username='@farhad' />
+        <Button
+          variant='ghost'
+          colorScheme='grey'
+          onClick={() => setAddMemberModalVisibility(true)}
+        >
+          Add a member...
+        </Button>
       </List>
     </Stack>
   );
