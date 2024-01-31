@@ -1,6 +1,8 @@
 package gorm
 
 import (
+	"errors"
+	"github.com/KimiaMontazeri/heppegram/back/handlers"
 	"github.com/KimiaMontazeri/heppegram/back/models"
 	"gorm.io/gorm"
 )
@@ -24,10 +26,26 @@ func (repo *User) FindByID(id uint) (*models.User, error) {
 	return &user, result.Error
 }
 
-func (repo *User) FindByKeyWord(keyword string) ([]*models.User, error) {
-	var users []*models.User
-	result := repo.db.Where("firstname LIKE ? OR lastname LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Find(&users)
-	return users, result.Error
+func (repo *User) FindByUsername(username string) (*models.User, error) {
+	var user models.User
+	result := repo.db.First(&user, "username = ?", username)
+	if errors.Is(gorm.ErrRecordNotFound, result.Error) {
+		return nil, nil
+	}
+	return &user, result.Error
+}
+
+func (repo *User) FindByKeyWord(keyword string) ([]*handlers.UserSearchResultDTO, error) {
+	var users []*handlers.UserSearchResultDTO
+	result := repo.db.Model(&models.User{}).Select("id, firstname, lastname, username, image, bio").
+		Where("firstname ILIKE ? OR lastname ILIKE ? OR username ILIKE ?",
+			"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%").
+		Scan(&users)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return users, nil
 }
 
 func (repo *User) Update(user *models.User) error {

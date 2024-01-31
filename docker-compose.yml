@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build: back
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=heppegram
+      - DB_PORT=5432
+    depends_on:
+      - db
+    networks:
+      - heppegram-net
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: heppegram
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - heppegram-net
+
+networks:
+  heppegram-net:
+
+volumes:
+  db-data:
