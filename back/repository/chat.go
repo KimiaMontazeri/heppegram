@@ -1,10 +1,11 @@
 package repository
 
-import "github.com/KimiaMontazeri/heppegram/back/model"
+import "github.com/KimiaMontazeri/heppegram/back/models"
 
-type ChatRepo interface {
-	Create(chat *model.Chat) error
-	FindAll() ([]*model.Chat, error)
-	FindByID(id string) (*model.Chat, error)
-	Delete(id string) error
+type Chat interface {
+	Create(chat *models.Chat) error
+	FindAll() ([]*models.Chat, error)
+	FindByID(id uint) (*models.Chat, error)
+	Delete(id uint) error
+	DeleteMessage(chatID uint, messageID uint) error
 }

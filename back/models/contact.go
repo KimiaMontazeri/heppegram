@@ -1,4 +1,4 @@
-package model
+package models
 
 import (
 	"gorm.io/gorm"
@@ -6,7 +6,7 @@ import (
 
 type Contact struct {
 	gorm.Model
-	UserID      uint   `gorm:"index"`
-	ContactID   uint   `gorm:"index"`
+	UserID      uint   `gorm:"foreignKey:UserID"`
+	ContactID   uint   `gorm:"foreignKey:ContactID"`
 	ContactName string `gorm:"type:varchar(100)"`
 }

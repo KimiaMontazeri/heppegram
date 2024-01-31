@@ -1,13 +1,13 @@
 package repository
 
 import (
-	"github.com/KimiaMontazeri/heppegram/back/model"
+	"github.com/KimiaMontazeri/heppegram/back/models"
 )
 
-type UserRepo interface {
-	Create(user *model.User) error
-	FindByID(id string) (*model.User, error)
-	FindByKeyWord(keyword string) ([]*model.User, error)
-	Update(user *model.User) error
-	Delete(id string) error
+type User interface {
+	Create(user *models.User) error
+	FindByID(id uint) (*models.User, error)
+	FindByKeyWord(keyword string) ([]*models.User, error)
+	Update(user *models.User) error
+	Delete(id uint) error
 }
