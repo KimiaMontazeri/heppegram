@@ -17,9 +17,9 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
           onClose={() => setDeleteMessageModalVisibility(false)}
         />
         <Flex justifyContent='flex-end'>
-          <Flex gap={2}>
-            <Stack pt={1} alignItems='flex-end'>
-              {messages.map((text) => (
+          <Flex gap={2} align='flex-end'>
+            <Stack pt={1} alignItems='flex-end' pb={1}>
+              {messages.map((text, index) => (
                 <Flex>
                   <IconButton
                     icon={<DeleteIcon />}
@@ -31,7 +31,12 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
                     mr={1}
                     onClick={() => setDeleteMessageModalVisibility(true)}
                   />
-                  <TextMessage>{text}</TextMessage>
+                  <TextMessage
+                    direction='start'
+                    showBubble={index === messages.length - 1}
+                  >
+                    {text}
+                  </TextMessage>
                 </Flex>
               ))}
             </Stack>
@@ -43,11 +48,16 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
   }
 
   return (
-    <Flex gap={2}>
+    <Flex gap={2} align='flex-end'>
       <Avatar name={from.name} src={from.photoUrl} />
-      <Stack pt={1} alignItems='flex-start'>
-        {messages.map((text) => (
-          <TextMessage>{text}</TextMessage>
+      <Stack pt={1} alignItems='flex-start' pb={1}>
+        {messages.map((text, index) => (
+          <TextMessage
+            direction='end'
+            showBubble={index === messages.length - 1}
+          >
+            {text}
+          </TextMessage>
         ))}
       </Stack>
     </Flex>
