@@ -49,7 +49,7 @@ function Login() {
   };
 
   return (
-    <Center>
+    <Center pt={16}>
       <Stack align='center' width='450px'>
         <Heading as='h1' size='xl'>
           Hi, Welcome Back! 👋
