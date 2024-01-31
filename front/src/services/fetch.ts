@@ -8,23 +8,31 @@ export type FetchParams = {
   sendCredentials?: boolean;
 };
 
+export type FetchResponse = {
+  ok: boolean;
+  status: number;
+  body: any;
+};
+
 export async function customFetch({
   url,
   method,
   payload,
   sendCredentials = true,
-}: FetchParams): Promise<Response> {
+}: FetchParams): Promise<FetchResponse> {
   const token = getToken();
   const headers = {
     Authorization: sendCredentials && token ? token : '',
     'content-type': 'application/json',
   };
 
-  const data = await fetch(url, {
+  const response = await fetch(url, {
     method,
     headers,
     ...(payload && { body: JSON.stringify(payload) }),
   });
+
+  const responseBody = await response.json();
 
   // if (data.status === 401) {
   //   const newToken = await handleRefreshToken();
@@ -41,5 +49,9 @@ export async function customFetch({
   //   }
   // }
 
-  return data;
+  return {
+    ok: response.ok,
+    status: response.status,
+    body: responseBody,
+  };
 }
