@@ -12,10 +12,12 @@ import { useState } from 'react';
 import { customFetch } from '../../../../services/fetch';
 import { BASE_URL } from '../../../../services/http-client';
 import type { SecondStepProps } from './second-step.types';
+import { useNavigate } from 'react-router-dom';
 
 const SecondStep = ({ username, password }: SecondStepProps) => {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const [firstname, setFirstname] = useState('');
   const [isFirstnameInvalid, setIsFirstnameInvalid] = useState(false);
@@ -30,7 +32,7 @@ const SecondStep = ({ username, password }: SecondStepProps) => {
   const [photo, setPhoto] = useState<File | null>();
 
   const handleRegister = async () => {
-    await customFetch({
+    const { ok, status, body } = await customFetch({
       url: `${BASE_URL}/api/register`,
       method: 'POST',
       payload: {
@@ -41,22 +43,27 @@ const SecondStep = ({ username, password }: SecondStepProps) => {
         phone,
       },
       sendCredentials: false,
-    })
-      .then(async (res) => {
-        res.json();
-      })
-      .then((response) => {
-        console.log({ response });
-        toast({
-          title: 'Account created.',
-          status: 'success',
-          duration: 2000,
-          isClosable: true,
-        });
-      })
-      .catch((error) => {
-        console.log({ error });
+    });
+    console.log({ ok, status, body });
+
+    if (ok) {
+      toast({
+        title: 'Account created successfully.',
+        status: 'success',
+        duration: 2000,
       });
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } else {
+      toast({
+        title: 'An error occurred :(',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+      navigate('/signup');
+    }
   };
 
   const handleSubmit = (e: MouseEvent) => {
@@ -96,17 +103,8 @@ const SecondStep = ({ username, password }: SecondStepProps) => {
     console.log(photo);
 
     handleRegister();
-    // setTimeout(() => {
-    //   setLoading(false);
-    //   // if ok
-    //   toast({
-    //     title: 'Account created.',
-    //     status: 'success',
-    //     duration: 2000,
-    //     isClosable: true,
-    //   });
-    //   handleContinue();
-    // }, 2000);
+
+    setLoading(false);
   };
 
   return (
