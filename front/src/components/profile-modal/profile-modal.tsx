@@ -52,7 +52,7 @@ const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
+    <Modal isOpen={isOpen} onClose={handleClose} scrollBehavior='inside'>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Profile</ModalHeader>
@@ -62,7 +62,7 @@ const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
             <Avatar
               name='Dan Abrahmov'
               src={previewImage ? previewImage : 'https://bit.ly/dan-abramov'}
-              size='2xl'
+              size='xl'
               style={{ cursor: 'pointer' }}
             />
           </Center>
