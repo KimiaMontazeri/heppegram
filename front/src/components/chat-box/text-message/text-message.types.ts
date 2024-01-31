@@ -4,4 +4,5 @@ export type TextMessageProps = {
   children: ReactNode;
   direction: 'start' | 'end';
   showBubble: boolean;
+  timestamp?: number;
 };

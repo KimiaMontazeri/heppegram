@@ -20,7 +20,7 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
           <Flex gap={2} align='flex-end'>
             <Stack pt={1} alignItems='flex-end' pb={1}>
               {messages.map((text, index) => (
-                <Flex>
+                <Flex align='center'>
                   <IconButton
                     icon={<DeleteIcon />}
                     colorScheme='red'

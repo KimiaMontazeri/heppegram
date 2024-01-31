@@ -1,4 +1,11 @@
-import { Box, Flex, createIcon, useColorModeValue } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  Stack,
+  Text,
+  createIcon,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import { TextMessageProps } from './text-message.types';
 import './text-message.css';
 
@@ -15,12 +22,55 @@ const BubbleIcon = createIcon({
   ),
 });
 
-const TextMessage = ({ children, direction, showBubble }: TextMessageProps) => {
+const TextMessage = ({
+  children,
+  direction,
+  showBubble,
+  timestamp = 12,
+}: TextMessageProps) => {
   const grayColor = useColorModeValue('gray.100', 'gray.700');
+  const grayTextColor = useColorModeValue('gray.500', 'gray.300');
 
   if (direction === 'start') {
     return (
+      <Stack align='flex-start'>
+        <Flex align='flex-end'>
+          <Box
+            bgColor={grayColor}
+            borderRadius='lg'
+            p={2}
+            px={3}
+            textAlign='start'
+          >
+            {children}
+            <Text fontSize='xs' color={grayTextColor}>
+              {timestamp}
+            </Text>
+          </Box>
+          <BubbleIcon
+            color='red.500'
+            w={4}
+            h={4}
+            mb={1}
+            visibility={!showBubble ? 'hidden' : 'visible'}
+            className='bubble startBubble'
+          />
+        </Flex>
+      </Stack>
+    );
+  }
+
+  return (
+    <Stack align='flex-start'>
       <Flex align='flex-end'>
+        <BubbleIcon
+          color='red.500'
+          w={4}
+          h={4}
+          mb={1}
+          visibility={!showBubble ? 'hidden' : 'visible'}
+          className='endBubble'
+        />
         <Box
           bgColor={grayColor}
           borderRadius='lg'
@@ -29,33 +79,12 @@ const TextMessage = ({ children, direction, showBubble }: TextMessageProps) => {
           textAlign='start'
         >
           {children}
+          <Text fontSize='xs' color={grayTextColor}>
+            {timestamp}
+          </Text>
         </Box>
-        <BubbleIcon
-          color='red.500'
-          w={4}
-          h={4}
-          mb={1}
-          visibility={!showBubble ? 'hidden' : 'visible'}
-          className='bubble startBubble'
-        />
       </Flex>
-    );
-  }
-
-  return (
-    <Flex align='flex-end'>
-      <BubbleIcon
-        color='red.500'
-        w={4}
-        h={4}
-        mb={1}
-        visibility={!showBubble ? 'hidden' : 'visible'}
-        className='endBubble'
-      />
-      <Box bgColor={grayColor} borderRadius='lg' p={2} px={3} textAlign='start'>
-        {children}
-      </Box>
-    </Flex>
+    </Stack>
   );
 };
 
