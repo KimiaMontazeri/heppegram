@@ -11,6 +11,8 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
+import { customFetch } from '../../services/fetch';
+import { setToken } from '../../services/token';
 
 function Login() {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ function Login() {
 
   const [username, setUsername] = useState('');
   const [isUsernameInvalid, setIsUsernameInvalid] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // password
   const [password, setPassword] = useState('');
@@ -25,6 +28,42 @@ function Login() {
 
   const handleClickOnSignup = () => {
     navigate('/signup');
+  };
+
+  const handleLogin = async () => {
+    setLoading(true);
+    const { ok, status, body } = await customFetch({
+      url: `/api/login`,
+      method: 'POST',
+      payload: {
+        username,
+        password,
+      },
+      sendCredentials: false,
+    });
+
+    if (ok) {
+      toast({
+        title: 'Successfully logged in.',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+      setToken(body.token);
+      setLoading(false);
+      setTimeout(() => {
+        navigate('/home');
+      }, 2000);
+      return;
+    }
+
+    setLoading(false);
+    toast({
+      title: status === 401 ? body.message : 'An error occurred.',
+      status: 'error',
+      duration: 2000,
+      isClosable: true,
+    });
   };
 
   const handleSubmit = (e: SubmitEvent) => {
@@ -38,14 +77,7 @@ function Login() {
       return;
     }
 
-    // TODO: call /login
-    // if ok
-    toast({
-      title: 'Successfully logged in.',
-      status: 'success',
-      duration: 2000,
-      isClosable: true,
-    });
+    handleLogin();
   };
 
   return (
@@ -76,7 +108,7 @@ function Login() {
                 placeholder='Enter your password'
               />
             </FormControl>
-            <Button type='submit' onClick={handleSubmit}>
+            <Button type='submit' onClick={handleSubmit} isLoading={loading}>
               Continue
             </Button>
             <Button variant='outline' onClick={handleClickOnSignup}>

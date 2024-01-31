@@ -70,7 +70,7 @@ function Signup() {
             handleSetPayload={handleNextStep}
           />
         ) : (
-          <SecondStep handleContinue={() => console.log('done')} />
+          <SecondStep username={username} password={password} />
         )}
       </Stack>
     </Center>

@@ -10,7 +10,6 @@ import {
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { customFetch } from '../../../../services/fetch';
-import { BASE_URL } from '../../../../services/http-client';
 import type { SecondStepProps } from './second-step.types';
 import { useNavigate } from 'react-router-dom';
 
@@ -32,8 +31,8 @@ const SecondStep = ({ username, password }: SecondStepProps) => {
   const [photo, setPhoto] = useState<File | null>();
 
   const handleRegister = async () => {
-    const { ok, status, body } = await customFetch({
-      url: `${BASE_URL}/api/register`,
+    const { ok } = await customFetch({
+      url: `/api/register`,
       method: 'POST',
       payload: {
         firstname,
@@ -44,7 +43,6 @@ const SecondStep = ({ username, password }: SecondStepProps) => {
       },
       sendCredentials: false,
     });
-    console.log({ ok, status, body });
 
     if (ok) {
       toast({

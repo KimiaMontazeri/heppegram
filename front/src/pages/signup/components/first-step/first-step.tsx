@@ -17,8 +17,6 @@ const FirstStep = ({ handleContinue, handleSetPayload }: FirstStepProps) => {
   // username
   const [username, setUsername] = useState('');
   const [isUsernameInvalid, setIsUsernameInvalid] = useState(false);
-  const [usernameHelperText, setUsernameHelperText] = useState(''); // username is already taken...
-
   // password
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(false);
@@ -69,7 +67,6 @@ const FirstStep = ({ handleContinue, handleSetPayload }: FirstStepProps) => {
             onChange={(e) => setUsername(e.target.value)}
             placeholder='Enter your username'
           />
-          <FormHelperText>{usernameHelperText}</FormHelperText>
         </FormControl>
         <FormControl isRequired>
           <FormLabel>Password</FormLabel>
