@@ -42,6 +42,7 @@ const ContactsModal = ({ isOpen, onClose }: ContactsModalProps) => {
               username='@dan123'
               image='https://bit.ly/dan-abramov'
             />
+            <Person name='Saman Hoseini' username='@saman2000h' />
             <Person name='Kimia Montazeri' username='@kimimtz' />
             <Person name='Farhad Aman' username='@farhad' />
           </List>
