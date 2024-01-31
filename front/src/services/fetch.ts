@@ -1,3 +1,4 @@
+import { BASE_URL } from './http-client';
 import { getToken } from './token';
 // import { handleRefreshToken } from './http-client';
 
@@ -26,7 +27,7 @@ export async function customFetch({
     'content-type': 'application/json',
   };
 
-  const response = await fetch(url, {
+  const response = await fetch(`${BASE_URL}${url}`, {
     method,
     headers,
     ...(payload && { body: JSON.stringify(payload) }),
