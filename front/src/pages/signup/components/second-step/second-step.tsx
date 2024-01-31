@@ -9,8 +9,11 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { useState } from 'react';
+import { customFetch } from '../../../../services/fetch';
+import { BASE_URL } from '../../../../services/http-client';
+import type { SecondStepProps } from './second-step.types';
 
-const SecondStep = ({ handleContinue }: { handleContinue: () => void }) => {
+const SecondStep = ({ username, password }: SecondStepProps) => {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -25,6 +28,36 @@ const SecondStep = ({ handleContinue }: { handleContinue: () => void }) => {
   const [bio, setBio] = useState('');
 
   const [photo, setPhoto] = useState<File | null>();
+
+  const handleRegister = async () => {
+    await customFetch({
+      url: `${BASE_URL}/api/register`,
+      method: 'POST',
+      payload: {
+        firstname,
+        lastname,
+        username,
+        password,
+        phone,
+      },
+      sendCredentials: false,
+    })
+      .then(async (res) => {
+        res.json();
+      })
+      .then((response) => {
+        console.log({ response });
+        toast({
+          title: 'Account created.',
+          status: 'success',
+          duration: 2000,
+          isClosable: true,
+        });
+      })
+      .catch((error) => {
+        console.log({ error });
+      });
+  };
 
   const handleSubmit = (e: MouseEvent) => {
     let toastTitle;
@@ -60,19 +93,20 @@ const SecondStep = ({ handleContinue }: { handleContinue: () => void }) => {
       return;
     }
 
-    console.log({ photo });
+    console.log(photo);
 
-    setTimeout(() => {
-      setLoading(false);
-      // if ok
-      toast({
-        title: 'Account created.',
-        status: 'success',
-        duration: 2000,
-        isClosable: true,
-      });
-      handleContinue();
-    }, 2000);
+    handleRegister();
+    // setTimeout(() => {
+    //   setLoading(false);
+    //   // if ok
+    //   toast({
+    //     title: 'Account created.',
+    //     status: 'success',
+    //     duration: 2000,
+    //     isClosable: true,
+    //   });
+    //   handleContinue();
+    // }, 2000);
   };
 
   return (

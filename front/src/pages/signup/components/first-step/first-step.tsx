@@ -9,8 +9,9 @@ import {
   Stack,
   useToast,
 } from '@chakra-ui/react';
+import type { FirstStepProps } from './first-step.types';
 
-const FirstStep = ({ handleContinue }: { handleContinue: () => void }) => {
+const FirstStep = ({ handleContinue, handleSetPayload }: FirstStepProps) => {
   const navigate = useNavigate();
   const toast = useToast();
   // username
@@ -50,6 +51,10 @@ const FirstStep = ({ handleContinue }: { handleContinue: () => void }) => {
       return;
     }
 
+    handleSetPayload({
+      username,
+      password,
+    });
     handleContinue();
   };
 

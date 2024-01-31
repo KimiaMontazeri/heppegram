@@ -14,14 +14,23 @@ import {
 } from '@chakra-ui/react';
 import FirstStep from './components/first-step';
 import SecondStep from './components/second-step';
+import { useState } from 'react';
+import type { Payload } from './components/first-step/first-step.types';
 
 const STEPS = [{ title: 'Username & Password' }, { title: 'Account Info' }];
 
 function Signup() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const { activeStep, setActiveStep } = useSteps({
     index: 1,
     count: STEPS.length,
   });
+
+  const handleNextStep = (payload: Payload) => {
+    setUsername(payload.username);
+    setPassword(payload.password);
+  };
 
   // const handleLogin = () => {
   //   // TODO:
@@ -56,7 +65,10 @@ function Signup() {
         </Stepper>
 
         {activeStep === 1 ? (
-          <FirstStep handleContinue={() => setActiveStep(2)} />
+          <FirstStep
+            handleContinue={() => setActiveStep(2)}
+            handleSetPayload={handleNextStep}
+          />
         ) : (
           <SecondStep handleContinue={() => console.log('done')} />
         )}

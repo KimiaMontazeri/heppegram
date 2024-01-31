@@ -9,7 +9,7 @@ export interface ApiResponse<T> {
 export type ApiResponsePromise<T> = Promise<ApiResponse<T>>;
 
 /* CONSTANTS */
-const BASE_URL = 'BASE_URL'; // TODO: specify base url
+export const BASE_URL = 'http://localhost:8080';
 
 export async function handleRefreshToken(): Promise<string | null> {
   const token = getToken();
@@ -47,7 +47,6 @@ export async function handleRefreshToken(): Promise<string | null> {
 
 async function post<T = any>(
   url: string,
-  token: string,
   payload?: FetchParams['payload'],
 ): Promise<ApiResponse<T>> {
   const args: FetchParams = {
@@ -56,22 +55,19 @@ async function post<T = any>(
     payload,
   };
 
-  const data = await customFetch(args, token);
+  const data = await customFetch(args);
   const result = await data.json();
   const { status } = data;
 
   return { result, status };
 }
 
-async function get<T = any>(
-  url: string,
-  token: string,
-): Promise<ApiResponse<T>> {
+async function get<T = any>(url: string): Promise<ApiResponse<T>> {
   const args: FetchParams = {
     url: `${BASE_URL}${url}`,
     method: 'GET',
   };
-  const data = await customFetch(args, token);
+  const data = await customFetch(args);
   const result = await data.json();
   const { status } = data;
 
@@ -80,7 +76,6 @@ async function get<T = any>(
 
 async function put<T = any>(
   url: string,
-  token: string,
   payload?: FetchParams['payload'],
 ): Promise<ApiResponse<T>> {
   const args: FetchParams = {
@@ -89,7 +84,7 @@ async function put<T = any>(
     payload,
   };
 
-  const data = await customFetch(args, token);
+  const data = await customFetch(args);
   const result = await data.json();
   const { status } = data;
 
@@ -98,7 +93,6 @@ async function put<T = any>(
 
 async function patch<T = any>(
   url: string,
-  token: string,
   payload?: FetchParams['payload'],
 ): Promise<ApiResponse<T>> {
   const args: FetchParams = {
@@ -106,7 +100,7 @@ async function patch<T = any>(
     method: 'PATCH',
     payload,
   };
-  const data = await customFetch(args, token);
+  const data = await customFetch(args);
   const result = await data.json();
   const { status } = data;
 
@@ -115,7 +109,6 @@ async function patch<T = any>(
 
 async function remove<T = any>(
   url: string,
-  token: string,
   payload?: FetchParams['payload'],
 ): Promise<ApiResponse<T>> {
   const args: FetchParams = {
@@ -124,7 +117,7 @@ async function remove<T = any>(
     payload,
   };
 
-  const data = await customFetch(args, token);
+  const data = await customFetch(args);
   const result = await data.json();
   const { status } = data;
 
