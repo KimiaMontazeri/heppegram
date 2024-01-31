@@ -28,6 +28,9 @@ func main() {
 	userRepo := gorm.NewUserRepo(db.DB)
 	userHandler := handlers.NewUserHandler(userRepo)
 
+	chatRepo := gorm.NewChatRepo(db.DB)
+	chatHandler := handlers.NewChatHandler(chatRepo)
+
 	// User Handlers
 	e.POST("/api/register", userHandler.Register)
 	e.POST("/api/login", userHandler.Login)
@@ -35,6 +38,13 @@ func main() {
 	e.GET("/api/users/:username", userHandler.GetUser, middle.JWTAuthentication)
 	e.PATCH("/api/users/:username", userHandler.UpdateUser, middle.JWTAuthentication)
 	e.DELETE("/api/users/:username", userHandler.DeleteUser, middle.JWTAuthentication)
+
+	// Chat Handlers
+	e.POST("/api/chats", chatHandler.CreateChat)
+	e.GET("/api/chats", chatHandler.GetAllChats)
+	e.GET("/api/chats/:chat_id", chatHandler.GetChat)
+	e.DELETE("/api/chats/:chat_id", chatHandler.DeleteChat)
+	e.DELETE("/api/chats/:chat_id/messages/:message_id", chatHandler.DeleteMessage)
 
 	log.Println("Starting Echo server on port 8080...")
 	e.Logger.Fatal(e.Start(":8080"))

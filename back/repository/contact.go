@@ -5,7 +5,7 @@ import (
 )
 
 type Contact interface {
-	FindByUserID(userID uint) ([]models.Contact, error)
+	FindByUserID(username string) ([]models.Contact, error)
 	Create(contact *models.Contact) error
-	Delete(userID uint, contactID uint) error
+	Delete(username uint, contactID uint) error
 }
