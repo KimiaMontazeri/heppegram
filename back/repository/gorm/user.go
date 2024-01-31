@@ -2,8 +2,8 @@ package gorm
 
 import (
 	"errors"
-	"github.com/KimiaMontazeri/heppegram/back/handlers"
 	"github.com/KimiaMontazeri/heppegram/back/models"
+	"github.com/KimiaMontazeri/heppegram/back/repository"
 	"gorm.io/gorm"
 )
 
@@ -29,8 +29,8 @@ func (repo *User) FindByUsername(username string) (*models.User, error) {
 	return &user, result.Error
 }
 
-func (repo *User) FindByKeyWord(keyword string) ([]*handlers.UserSearchResultDTO, error) {
-	var users []*handlers.UserSearchResultDTO
+func (repo *User) FindByKeyWord(keyword string) ([]*repository.UserSearchResultDTO, error) {
+	var users []*repository.UserSearchResultDTO
 	result := repo.db.Model(&models.User{}).Select("id, firstname, lastname, username, image, bio").
 		Where("firstname ILIKE ? OR lastname ILIKE ? OR username ILIKE ?",
 			"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%").

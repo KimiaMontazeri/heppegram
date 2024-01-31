@@ -8,12 +8,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
+	time.Sleep(5 * time.Second)
 	db.Init()
 	e := echo.New()
-	e.Use(middleware.JWTAuthentication)
 
 	e.GET("/", func(c echo.Context) error {
 		log.Println("Handling the request for the root route")

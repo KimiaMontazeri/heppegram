@@ -33,15 +33,6 @@ type UserUpdateDTO struct {
 	Bio       string `json:"bio"`
 }
 
-type UserSearchResultDTO struct {
-	ID        uint   `json:"id"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
-	Username  string `json:"username"`
-	Image     string `json:"image"`
-	Bio       string `json:"bio"`
-}
-
 type UserLoginDTO struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
