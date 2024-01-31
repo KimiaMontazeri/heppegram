@@ -28,9 +28,9 @@ func main() {
 	e.POST("/api/register", userHandler.Register)
 	e.POST("/api/login", userHandler.Login)
 	e.GET("/api/users", userHandler.SearchUsers)
-	e.GET("/api/users/:user_id", userHandler.GetUser, middleware.JWTAuthentication)
-	e.PATCH("/api/users/:user_id", userHandler.UpdateUser, middleware.JWTAuthentication)
-	e.DELETE("/api/users/:user_id", userHandler.DeleteUser, middleware.JWTAuthentication)
+	e.GET("/api/users/:username", userHandler.GetUser, middleware.JWTAuthentication)
+	e.PATCH("/api/users/:username", userHandler.UpdateUser, middleware.JWTAuthentication)
+	e.DELETE("/api/users/:username", userHandler.DeleteUser, middleware.JWTAuthentication)
 
 	log.Println("Starting Echo server on port 8080...")
 	e.Logger.Fatal(e.Start(":8080"))

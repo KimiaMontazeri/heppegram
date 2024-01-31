@@ -5,6 +5,7 @@ import (
 	"github.com/KimiaMontazeri/heppegram/back/repository"
 	"github.com/KimiaMontazeri/heppegram/back/utils"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 )
 
@@ -95,6 +96,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 func (h *UserHandler) GetUser(c echo.Context) error {
 	username := c.Param("username")
 	authUsername := c.Get("username")
+	log.Println("Auth Username: ", authUsername)
 	if authUsername != username {
 		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
 	}
