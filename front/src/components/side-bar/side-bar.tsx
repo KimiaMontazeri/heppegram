@@ -14,13 +14,25 @@ import {
 import ProfileModal from '../profile-modal';
 import { useState } from 'react';
 import ContactsModal from '../contacts-modal';
+import { removeToken } from '../../services/token';
+import { useNavigate } from 'react-router-dom';
+import useUserStore from '../../store/user-store';
 
 const SideBar = () => {
+  const navigate = useNavigate();
+  const setUser = useUserStore((state) => state.setUser);
   const { colorMode, toggleColorMode } = useColorMode();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [contactsModalOpen, setContactsModalOpen] = useState(false);
 
   const colorModeIcon = colorMode === 'light' ? <MoonIcon /> : <SunIcon />;
+
+  const handleLogout = () => {
+    removeToken();
+    setUser(null);
+    navigate('/login');
+  };
+
   return (
     <Stack
       alignItems='center'
@@ -56,7 +68,7 @@ const SideBar = () => {
             <MenuItem onClick={() => setContactsModalOpen(true)}>
               Open contacts list
             </MenuItem>
-            <MenuItem>Logout</MenuItem>
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
             <MenuItem>Delete account</MenuItem>
           </MenuList>
         </Portal>

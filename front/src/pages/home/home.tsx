@@ -4,8 +4,11 @@ import ChatBox from '../../components/chat-box';
 import ChatDetails from '../../components/chat-details';
 import SideBar from '../../components/side-bar';
 import GroupDetails from '../../components/group-details';
+import useUserStore from '../../store/user-store';
 
 function Home() {
+  const user = useUserStore((state) => state.user);
+  console.log({ user });
   /* 
     Get the below items from the store
     - profile data

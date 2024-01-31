@@ -13,8 +13,10 @@ import {
 } from '@chakra-ui/react';
 import { customFetch } from '../../services/fetch';
 import { setToken } from '../../services/token';
+import useUserStore from '../../store/user-store';
 
 function Login() {
+  const setUser = useUserStore((state) => state.setUser);
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -50,6 +52,7 @@ function Login() {
         isClosable: true,
       });
       setToken(body.token);
+      setUser({ username: username });
       setLoading(false);
       setTimeout(() => {
         navigate('/home');
