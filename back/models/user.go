@@ -11,6 +11,6 @@ type User struct {
 	Phone     string `gorm:"unique;type:varchar(100)"`
 	Username  string `gorm:"unique;type:varchar(100)"`
 	Password  string `gorm:"type:varchar(100)"`
-	Image     string `gorm:"unique;type:varchar(100)"`
+	Image     string `gorm:"type:varchar(100)"`
 	Bio       string `gorm:"type:text"`
 }
