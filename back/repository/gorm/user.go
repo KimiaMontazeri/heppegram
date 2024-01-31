@@ -20,12 +20,6 @@ func (repo *User) Create(user *models.User) error {
 	return result.Error
 }
 
-func (repo *User) FindByID(id uint) (*models.User, error) {
-	var user models.User
-	result := repo.db.First(&user, "id = ?", id)
-	return &user, result.Error
-}
-
 func (repo *User) FindByUsername(username string) (*models.User, error) {
 	var user models.User
 	result := repo.db.First(&user, "username = ?", username)
@@ -53,7 +47,7 @@ func (repo *User) Update(user *models.User) error {
 	return result.Error
 }
 
-func (repo *User) Delete(id uint) error {
-	result := repo.db.Delete(&models.User{}, id)
+func (repo *User) Delete(username string) error {
+	result := repo.db.Where("username = ?", username).Delete(&models.User{})
 	return result.Error
 }

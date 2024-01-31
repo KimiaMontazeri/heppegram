@@ -6,7 +6,6 @@ import (
 	"github.com/KimiaMontazeri/heppegram/back/utils"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strconv"
 )
 
 type UserHandler struct {
@@ -103,18 +102,13 @@ func (h *UserHandler) Login(c echo.Context) error {
 }
 
 func (h *UserHandler) GetUser(c echo.Context) error {
-	userIDParam := c.Param("user_id")
-	userID, err := strconv.ParseUint(userIDParam, 10, 32)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user ID")
-	}
-
-	authUserID := c.Get("userID").(uint)
-	if authUserID != uint(userID) {
+	username := c.Param("username")
+	authUsername := c.Get("username")
+	if authUsername != username {
 		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
 	}
 
-	user, err := h.UserRepo.FindByID(uint(userID))
+	user, err := h.UserRepo.FindByUsername(username)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -126,14 +120,9 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 }
 
 func (h *UserHandler) UpdateUser(c echo.Context) error {
-	userIDParam := c.Param("user_id")
-	userID, err := strconv.ParseUint(userIDParam, 10, 32)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user ID")
-	}
-
-	authUserID := c.Get("userID").(uint)
-	if authUserID != uint(userID) {
+	username := c.Param("username")
+	authUsername := c.Get("username")
+	if authUsername != username {
 		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
 	}
 
@@ -142,7 +131,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Error binding user data")
 	}
 
-	user, err := h.UserRepo.FindByID(uint(userID))
+	user, err := h.UserRepo.FindByUsername(username)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error fetching user")
 	}
@@ -167,18 +156,13 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 }
 
 func (h *UserHandler) DeleteUser(c echo.Context) error {
-	userIDParam := c.Param("user_id")
-	userID, err := strconv.ParseUint(userIDParam, 10, 32)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user ID")
-	}
-
-	authUserID := c.Get("userID").(uint)
-	if authUserID != uint(userID) {
+	username := c.Param("name")
+	authUsername := c.Get("username")
+	if authUsername != username {
 		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
 	}
 
-	if err := h.UserRepo.Delete(uint(userID)); err != nil {
+	if err := h.UserRepo.Delete(username); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error deleting user")
 	}
 
