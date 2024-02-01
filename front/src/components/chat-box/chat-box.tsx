@@ -60,7 +60,7 @@ const ChatBox = ({ id }: ChatBoxProps) => {
 
   useEffect(() => {
     getChatData();
-  }, []);
+  }, [id]);
 
   return (
     <Stack
