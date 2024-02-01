@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { customFetch } from '../../services/fetch';
 import { setToken } from '../../services/token';
+import { setUsername as setUsernameInLocalStorage } from '../../services/user';
 import useUserStore from '../../store/user-store';
 
 function Login() {
@@ -53,6 +54,8 @@ function Login() {
       });
       setToken(body.token);
       setUser({ username: username });
+      // store username into localStorage :))
+      setUsernameInLocalStorage(username);
       setLoading(false);
       setTimeout(() => {
         navigate('/home');

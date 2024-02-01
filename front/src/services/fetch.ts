@@ -23,7 +23,7 @@ export async function customFetch({
 }: FetchParams): Promise<FetchResponse> {
   const token = getToken();
   const headers = {
-    Authorization: sendCredentials && token ? token : '',
+    Authorization: sendCredentials && token ? `Bearer ${token}` : '',
     'content-type': 'application/json',
   };
 
