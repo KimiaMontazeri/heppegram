@@ -1,6 +1,6 @@
 module github.com/KimiaMontazeri/heppegram/back
 
-go 1.21.5
+go 1.21.6
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
