@@ -4,6 +4,7 @@ import "github.com/KimiaMontazeri/heppegram/back/models"
 
 type Chat interface {
 	Create(chat *models.Chat) error
+	FindAllForUsername(username string) ([]*models.Chat, error)
 	FindAll() ([]*models.Chat, error)
 	FindByID(id uint) (*models.Chat, error)
 	Delete(id uint) error

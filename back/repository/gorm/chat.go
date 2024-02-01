@@ -18,6 +18,22 @@ func (repo *Chat) Create(chat *models.Chat) error {
 	return result.Error
 }
 
+func (repo *Chat) FindAllForUsername(username string) ([]*models.Chat, error) {
+	var chats []*models.Chat
+
+	result := repo.db.Joins("JOIN chat_users on chat_users.chat_id = chats.id").
+		Joins("JOIN users on users.id = chat_users.user_id").
+		Where("users.username = ?", username).
+		Preload("People").
+		Find(&chats)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return chats, nil
+}
+
 func (repo *Chat) FindAll() ([]*models.Chat, error) {
 	var chats []*models.Chat
 	result := repo.db.Preload("People").Find(&chats)

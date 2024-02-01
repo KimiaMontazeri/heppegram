@@ -17,6 +17,15 @@ func NewUserHandler(userRepo repository.User) *UserHandler {
 	return &UserHandler{UserRepo: userRepo}
 }
 
+type UserResponseDTO struct {
+	ID        uint   `json:"id"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Phone     string `json:"phone"`
+	Username  string `json:"username"`
+	Bio       string `json:"bio"`
+}
+
 type UserRegisterDTO struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`

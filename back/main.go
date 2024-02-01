@@ -26,10 +26,10 @@ func main() {
 	})
 
 	userRepo := gorm.NewUserRepo(db.DB)
-	userHandler := handlers.NewUserHandler(userRepo)
-
 	chatRepo := gorm.NewChatRepo(db.DB)
-	chatHandler := handlers.NewChatHandler(chatRepo)
+	messageRepo := gorm.NewMessageRepo(db.DB)
+	userHandler := handlers.NewUserHandler(userRepo)
+	chatHandler := handlers.NewChatHandler(chatRepo, userRepo, messageRepo)
 
 	// User Handlers
 	e.POST("/api/register", userHandler.Register)
@@ -40,8 +40,8 @@ func main() {
 	e.DELETE("/api/users/:username", userHandler.DeleteUser, middle.JWTAuthentication)
 
 	// Chat Handlers
-	e.POST("/api/chats", chatHandler.CreateChat)
-	e.GET("/api/chats", chatHandler.GetAllChats)
+	e.POST("/api/chats", chatHandler.CreateChat, middle.JWTAuthentication)
+	e.GET("/api/chats", chatHandler.GetChats, middle.JWTAuthentication)
 	e.GET("/api/chats/:chat_id", chatHandler.GetChat)
 	e.DELETE("/api/chats/:chat_id", chatHandler.DeleteChat)
 	e.DELETE("/api/chats/:chat_id/messages/:message_id", chatHandler.DeleteMessage)

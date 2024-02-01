@@ -20,6 +20,12 @@ func (repo *User) Create(user *models.User) error {
 	return result.Error
 }
 
+func (repo *User) FindByID(id uint) (*models.User, error) {
+	var user models.User
+	result := repo.db.First(&user, "id = ?", id)
+	return &user, result.Error
+}
+
 func (repo *User) FindByUsername(username string) (*models.User, error) {
 	var user models.User
 	result := repo.db.First(&user, "username = ?", username)
