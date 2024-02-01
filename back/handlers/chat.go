@@ -129,7 +129,27 @@ func (h *ChatHandler) CreateChat(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "Error creating chat")
 	}
 
-	return c.JSON(http.StatusCreated, chat)
+	peopleDTOs := make([]UserResponseDTO, len(chat.People))
+	for i, user := range chat.People {
+		peopleDTOs[i] = UserResponseDTO{
+			ID:        user.ID,
+			Firstname: user.Firstname,
+			Lastname:  user.Lastname,
+			Phone:     user.Phone,
+			Username:  user.Username,
+			Bio:       user.Bio,
+		}
+	}
+
+	var messagesDTOs []MessageDTO
+
+	chatResponseDTO := ChatResponseDTO{
+		ID:       chat.ID,
+		People:   peopleDTOs,
+		Messages: messagesDTOs, // empty for new chat
+	}
+
+	return c.JSON(http.StatusCreated, chatResponseDTO)
 }
 
 func (h *ChatHandler) GetChats(c echo.Context) error {
