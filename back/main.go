@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/KimiaMontazeri/heppegram/back/db"
 	"github.com/KimiaMontazeri/heppegram/back/handlers"
-	middle "github.com/KimiaMontazeri/heppegram/back/middleware"
+	customMiddleware "github.com/KimiaMontazeri/heppegram/back/middleware"
 	"github.com/KimiaMontazeri/heppegram/back/repository/gorm"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo-contrib/jaegertracing"
@@ -46,6 +46,8 @@ func main() {
 	userHandler := handlers.NewUserHandler(userRepo)
 	chatHandler := handlers.NewChatHandler(chatRepo, userRepo, messageRepo)
 
+	e.GET("/healthz", func(c echo.Context) error { return c.NoContent(http.StatusNoContent) })
+
 	api := e.Group("/api")
 	user := api.Group("/user")
 	users := api.Group("/users")
@@ -54,22 +56,24 @@ func main() {
 	user.POST("/register", userHandler.Register)
 	user.POST("/login", userHandler.Login)
 
-	// Users Handlers
+	users.Use(customMiddleware.JWTAuthentication)
 	users.GET("", userHandler.SearchUsers)
-	users.GET("/:username", userHandler.GetUser, middle.JWTAuthentication)
-	users.PATCH("/:username", userHandler.UpdateUser, middle.JWTAuthentication)
-	users.DELETE("/:username", userHandler.DeleteUser, middle.JWTAuthentication)
+	users.GET("/:username", userHandler.GetUser)
+	users.PATCH("/:username", userHandler.UpdateUser)
+	users.DELETE("/:username", userHandler.DeleteUser)
 
 	// Chat Handlers
 	chat := api.Group("/chats")
-	chat.POST("", chatHandler.CreateChat, middle.JWTAuthentication)
-	chat.GET("", chatHandler.GetChats, middle.JWTAuthentication)
-	chat.GET("/:chat_id", chatHandler.GetChat, middle.JWTAuthentication)
-	chat.DELETE("/:chat_id", chatHandler.DeleteChat, middle.JWTAuthentication)
-	chat.DELETE("/:chat_id/messages/:message_id", chatHandler.DeleteMessage, middle.JWTAuthentication)
+	chat.Use(customMiddleware.JWTAuthentication)
+	chat.POST("", chatHandler.CreateChat)
+	chat.GET("", chatHandler.GetChats)
+	chat.GET("/:chat_id", chatHandler.GetChat)
+	chat.DELETE("/:chat_id", chatHandler.DeleteChat)
+	chat.DELETE("/:chat_id/messages/:message_id", chatHandler.DeleteMessage)
 
 	ws := e.Group("/ws")
-	ws.GET("", chatHandler.HandleWebSocket, middle.JWTAuthentication)
+	ws.Use(customMiddleware.JWTAuthentication)
+	ws.GET("", chatHandler.HandleWebSocket)
 
 	log.Println("Starting Echo server on port 8080...")
 	e.Logger.Fatal(e.Start(":8080"))
