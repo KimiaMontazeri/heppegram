@@ -14,13 +14,16 @@ import { getUserFromChat } from '../../utils/chat';
 function Home() {
   const toast = useToast();
   const [chatList, setChatList] = useState<Chats | null>(null);
+  const [chatDetailsData, setChatDetailsData] = useState<User | null>(null);
   const setChats = useChatsStore((state) => state.setChats);
   const chats = useChatsStore((state) => state.chats);
   const username = useUserStore((state) => state.user?.username);
   const selectedChat = useAppStore((state) => state.selectedChat);
   const selectedChatData = useAppStore((state) => state.selectedChatData);
 
-  const [chatDetailsData, setChatDetailsData] = useState<User | null>(null);
+  /* WEB SOCKET */
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [message, setMessage] = useState('');
 
   const getChats = async () => {
     const { ok, body } = await customFetch({
@@ -57,6 +60,43 @@ function Home() {
   useEffect(() => {
     getChats();
   }, []);
+
+  /* WEB SOCKET */
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8080');
+
+    ws.onopen = () => {
+      console.log('WebSocket connected');
+    };
+
+    ws.onmessage = (event) => {
+      setMessage(event.data);
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    setSocket(ws);
+
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+    };
+  }, []);
+
+  const sendMessage = () => {
+    if (socket?.readyState === WebSocket.OPEN) {
+      socket.send('Hello, WebSocket server!');
+    }
+  };
+
+  console.log('Received message from WS: ', message);
 
   return (
     <Stack
