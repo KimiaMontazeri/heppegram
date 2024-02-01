@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import useUserStore from '../../store/user-store';
 import { getUsername, removeUsername } from '../../services/user';
 import { customFetch } from '../../services/fetch';
+import DeleteAccountModal from '../delete-account-modal';
 
 const SideBar = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const SideBar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [contactsModalOpen, setContactsModalOpen] = useState(false);
+  const [deleteAccountModalOpen, setDeleteAccountModalOpen] = useState(false);
 
   const colorModeIcon = colorMode === 'light' ? <MoonIcon /> : <SunIcon />;
 
@@ -84,6 +86,10 @@ const SideBar = () => {
         isOpen={contactsModalOpen}
         onClose={() => setContactsModalOpen(false)}
       />
+      <DeleteAccountModal
+        isOpen={deleteAccountModalOpen}
+        onClose={() => setDeleteAccountModalOpen(false)}
+      />
 
       <Menu>
         <MenuButton>
@@ -105,7 +111,9 @@ const SideBar = () => {
               Open contacts list
             </MenuItem>
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
-            <MenuItem>Delete account</MenuItem>
+            <MenuItem onClick={() => setDeleteAccountModalOpen(true)}>
+              Delete account
+            </MenuItem>
           </MenuList>
         </Portal>
       </Menu>
