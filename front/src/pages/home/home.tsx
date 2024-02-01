@@ -83,7 +83,15 @@ function Home() {
       </Stack>
       <Divider orientation='vertical' />
       <Stack flexGrow={2}>
-        {selectedChat && <ChatBox id={selectedChat} />}
+        {selectedChat ? (
+          <ChatBox id={selectedChat} />
+        ) : (
+          <Center height='100vh'>
+            <Text fontSize='lg' color='yellow.500'>
+              No chat selected!
+            </Text>
+          </Center>
+        )}
       </Stack>
       {chatDetailsData && (
         <>
