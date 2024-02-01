@@ -42,9 +42,9 @@ func main() {
 	// Chat Handlers
 	e.POST("/api/chats", chatHandler.CreateChat, middle.JWTAuthentication)
 	e.GET("/api/chats", chatHandler.GetChats, middle.JWTAuthentication)
-	e.GET("/api/chats/:chat_id", chatHandler.GetChat)
-	e.DELETE("/api/chats/:chat_id", chatHandler.DeleteChat)
-	e.DELETE("/api/chats/:chat_id/messages/:message_id", chatHandler.DeleteMessage)
+	e.GET("/api/chats/:chat_id", chatHandler.GetChat, middle.JWTAuthentication)
+	e.DELETE("/api/chats/:chat_id", chatHandler.DeleteChat, middle.JWTAuthentication)
+	e.DELETE("/api/chats/:chat_id/messages/:message_id", chatHandler.DeleteMessage, middle.JWTAuthentication)
 
 	log.Println("Starting Echo server on port 8080...")
 	e.Logger.Fatal(e.Start(":8080"))
