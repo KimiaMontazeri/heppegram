@@ -45,21 +45,29 @@ func main() {
 	userHandler := handlers.NewUserHandler(userRepo)
 	chatHandler := handlers.NewChatHandler(chatRepo, userRepo, messageRepo)
 
+	api := e.Group("/api")
+	user := api.Group("/user")
+	users := api.Group("/users")
+
 	// User Handlers
-	e.POST("/api/register", userHandler.Register)
-	e.POST("/api/login", userHandler.Login)
-	e.GET("/api/users", userHandler.SearchUsers)
-	e.GET("/api/users/:username", userHandler.GetUser, middle.JWTAuthentication)
-	e.PATCH("/api/users/:username", userHandler.UpdateUser, middle.JWTAuthentication)
-	e.DELETE("/api/users/:username", userHandler.DeleteUser, middle.JWTAuthentication)
+	user.POST("/register", userHandler.Register)
+	user.POST("/login", userHandler.Login)
+
+	users.GET("", userHandler.SearchUsers)
+	users.GET("/:username", userHandler.GetUser, middle.JWTAuthentication)
+	users.PATCH("/:username", userHandler.UpdateUser, middle.JWTAuthentication)
+	users.DELETE("/:username", userHandler.DeleteUser, middle.JWTAuthentication)
 
 	// Chat Handlers
-	e.POST("/api/chats", chatHandler.CreateChat, middle.JWTAuthentication)
-	e.GET("/api/chats", chatHandler.GetChats, middle.JWTAuthentication)
-	e.GET("/api/chats/:chat_id", chatHandler.GetChat, middle.JWTAuthentication)
-	e.DELETE("/api/chats/:chat_id", chatHandler.DeleteChat, middle.JWTAuthentication)
-	e.DELETE("/api/chats/:chat_id/messages/:message_id", chatHandler.DeleteMessage, middle.JWTAuthentication)
-	e.GET("/ws", chatHandler.HandleWebSocket, middle.JWTAuthentication)
+	chat := api.Group("/chats")
+	chat.POST("", chatHandler.CreateChat, middle.JWTAuthentication)
+	chat.GET("", chatHandler.GetChats, middle.JWTAuthentication)
+	chat.GET("/:chat_id", chatHandler.GetChat, middle.JWTAuthentication)
+	chat.DELETE("/:chat_id", chatHandler.DeleteChat, middle.JWTAuthentication)
+	chat.DELETE("/:chat_id/messages/:message_id", chatHandler.DeleteMessage, middle.JWTAuthentication)
+
+	ws := e.Group("/ws")
+	ws.GET("", chatHandler.HandleWebSocket, middle.JWTAuthentication)
 
 	log.Println("Starting Echo server on port 8080...")
 	e.Logger.Fatal(e.Start(":8080"))
