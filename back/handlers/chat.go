@@ -230,30 +230,100 @@ func (h *ChatHandler) GetChat(c echo.Context) error {
 }
 
 func (h *ChatHandler) DeleteChat(c echo.Context) error {
+	authUsername, ok := c.Get("username").(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "User not authenticated")
+	}
+
 	id, err := strconv.ParseUint(c.Param("chat_id"), 10, 32)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid chat ID")
 	}
 
-	if err := h.ChatRepo.Delete(uint(id)); err != nil {
+	chat, err := h.ChatRepo.FindByID(uint(id))
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	if chat == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Chat not found")
+	}
+
+	isParticipant := false
+	for _, user := range chat.People {
+		if user.Username == authUsername {
+			isParticipant = true
+			break
+		}
+	}
+	if !isParticipant {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied to the chat")
+	}
+
+	if err := h.ChatRepo.Delete(uint(id)); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error deleting chat")
 	}
 
 	return c.NoContent(http.StatusNoContent)
+
 }
 
 func (h *ChatHandler) DeleteMessage(c echo.Context) error {
+	authUsername, ok := c.Get("username").(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "User not authenticated")
+	}
+
 	chatID, err := strconv.ParseUint(c.Param("chat_id"), 10, 32)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid chat ID")
 	}
+
 	messageID, err := strconv.ParseUint(c.Param("message_id"), 10, 32)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid message ID")
 	}
 
-	if err := h.ChatRepo.DeleteMessage(uint(chatID), uint(messageID)); err != nil {
+	chat, err := h.ChatRepo.FindByID(uint(chatID))
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	if chat == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Chat not found")
+	}
+
+	isParticipant := false
+	for _, user := range chat.People {
+		if user.Username == authUsername {
+			isParticipant = true
+			break
+		}
+	}
+	if !isParticipant {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied to the chat")
+	}
+
+	message, err := h.MessageRepo.FindByID(uint(messageID))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	if message == nil || message.ChatID != uint(chatID) {
+		return echo.NewHTTPError(http.StatusNotFound, "Message not found in this chat")
+	}
+
+	authUser, err := h.UserRepo.FindByUsername(authUsername)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error fetching user details")
+	}
+	if authUser == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Authenticated user not found")
+	}
+
+	if message.SenderID != authUser.ID {
+		return echo.NewHTTPError(http.StatusForbidden, "Only the sender can delete the message")
+	}
+
+	if err := h.MessageRepo.Delete(uint(messageID)); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error deleting message")
 	}
 
 	return c.NoContent(http.StatusNoContent)

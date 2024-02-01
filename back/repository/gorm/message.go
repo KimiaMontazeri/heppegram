@@ -34,3 +34,23 @@ func (repo *Message) FindMessagesByChatID(chatID uint) ([]*models.Message, error
 	}
 	return messages, nil
 }
+
+func (repo *Message) FindByID(messageID uint) (*models.Message, error) {
+	var message models.Message
+	result := repo.db.Where("id = ?", messageID).First(&message)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+	return &message, nil
+}
+
+func (repo *Message) Delete(messageID uint) error {
+	result := repo.db.Delete(&models.Message{}, messageID)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
