@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/KimiaMontazeri/heppegram/back/models"
 	"github.com/KimiaMontazeri/heppegram/back/repository"
-	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
@@ -24,60 +23,6 @@ func NewChatHandler(chatRepo repository.Chat, userRepo repository.User, messageR
 	}
 }
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-func (h *ChatHandler) HandleWebSocket(c echo.Context) error {
-	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	defer func(ws *websocket.Conn) {
-		err := ws.Close()
-		if err != nil {
-
-		}
-	}(ws)
-
-	authUsername := c.Get("username").(string)
-	if authUsername == "" {
-		return echo.NewHTTPError(http.StatusUnauthorized, "User not authenticated")
-	}
-
-	user, err := h.UserRepo.FindByUsername(authUsername)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error fetching user details")
-	}
-	if user == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "User not found")
-	}
-
-	for {
-		_, msg, err := ws.ReadMessage()
-		if err != nil {
-			log.Println("read:", err)
-			break
-		}
-		log.Printf("Received: %s\n", msg)
-
-		// Process the message and potentially send messages in response
-		// You can define different types of messages (e.g., new message, typing indicator, etc.)
-		// and handle them here
-
-		err = ws.WriteMessage(websocket.TextMessage, msg)
-		if err != nil {
-			log.Println("write:", err)
-			break
-		}
-	}
-
-	return nil
-}
-
 type ChatCreateDTO struct {
 	Username string `json:"username"`
 }
@@ -85,13 +30,13 @@ type ChatCreateDTO struct {
 type ChatResponseDTO struct {
 	ID       uint              `json:"id"`
 	People   []UserResponseDTO `json:"people"`
-	Messages []MessageDTO      `json:"messages"`
+	Messages []MessageResponse `json:"messages"`
 }
 
 type ChatPreviewDTO struct {
 	ID          uint              `json:"id"`
 	People      []UserResponseDTO `json:"people"`
-	LastMessage MessageDTO        `json:"lastMessage"`
+	LastMessage MessageResponse   `json:"lastMessage"`
 }
 
 func (h *ChatHandler) CreateChat(c echo.Context) error {
@@ -141,12 +86,12 @@ func (h *ChatHandler) CreateChat(c echo.Context) error {
 		}
 	}
 
-	var messagesDTOs []MessageDTO
+	var messagesResponses []MessageResponse
 
 	chatResponseDTO := ChatResponseDTO{
 		ID:       chat.ID,
 		People:   peopleDTOs,
-		Messages: messagesDTOs, // empty for new chat
+		Messages: messagesResponses,
 	}
 
 	return c.JSON(http.StatusCreated, chatResponseDTO)
@@ -172,7 +117,7 @@ func (h *ChatHandler) GetChats(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, "Failed to fetch the latest message.")
 		}
 
-		messageDTO := new(MessageDTO)
+		messageResponse := new(MessageResponse)
 		if message != nil {
 			user, err := h.UserRepo.FindByID(message.SenderID)
 			if err != nil {
@@ -191,16 +136,17 @@ func (h *ChatHandler) GetChats(c echo.Context) error {
 				Bio:       user.Bio,
 			}
 
-			messageDTO.ID = message.ID
-			messageDTO.Content = message.Content
-			messageDTO.Timestamp = message.CreatedAt
-			messageDTO.Sender = userResponseDTO
+			messageResponse.ID = message.ID
+			messageResponse.ChatID = chat.ID
+			messageResponse.Content = message.Content
+			messageResponse.Timestamp = message.CreatedAt
+			messageResponse.Sender = userResponseDTO
 		}
 
 		chatPreviewDTO := ChatPreviewDTO{
 			ID:          chat.ID,
 			People:      make([]UserResponseDTO, 0, len(chat.People)),
-			LastMessage: *messageDTO,
+			LastMessage: *messageResponse,
 		}
 
 		for _, user := range chat.People {
@@ -258,7 +204,7 @@ func (h *ChatHandler) GetChat(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	messageDTOs := make([]MessageDTO, len(messages))
+	MessageResponses := make([]MessageResponse, len(messages))
 	for i, message := range messages {
 		sender, err := h.UserRepo.FindByID(message.SenderID)
 		if err != nil {
@@ -278,8 +224,9 @@ func (h *ChatHandler) GetChat(c echo.Context) error {
 			Bio:       sender.Bio,
 		}
 
-		messageDTOs[i] = MessageDTO{
+		MessageResponses[i] = MessageResponse{
 			ID:        message.ID,
+			ChatID:    chat.ID,
 			Sender:    senderDTO,
 			Content:   message.Content,
 			Timestamp: message.CreatedAt,
@@ -301,7 +248,7 @@ func (h *ChatHandler) GetChat(c echo.Context) error {
 	chatResponseDTO := ChatResponseDTO{
 		ID:       chat.ID,
 		People:   peopleDTOs,
-		Messages: messageDTOs,
+		Messages: MessageResponses,
 	}
 
 	return c.JSON(http.StatusOK, chatResponseDTO)
