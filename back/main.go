@@ -5,6 +5,7 @@ import (
 	"github.com/KimiaMontazeri/heppegram/back/handlers"
 	middle "github.com/KimiaMontazeri/heppegram/back/middleware"
 	"github.com/KimiaMontazeri/heppegram/back/repository/gorm"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
@@ -19,6 +20,9 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORS())
+	e.Use(echoprometheus.NewMiddleware("heppegram"))
+
+	e.GET("/metrics", echoprometheus.NewHandler())
 
 	e.GET("/", func(c echo.Context) error {
 		log.Println("Handling the request for the root route")
@@ -45,6 +49,7 @@ func main() {
 	e.GET("/api/chats/:chat_id", chatHandler.GetChat, middle.JWTAuthentication)
 	e.DELETE("/api/chats/:chat_id", chatHandler.DeleteChat, middle.JWTAuthentication)
 	e.DELETE("/api/chats/:chat_id/messages/:message_id", chatHandler.DeleteMessage, middle.JWTAuthentication)
+	e.GET("/ws", chatHandler.HandleWebSocket, middle.JWTAuthentication)
 
 	log.Println("Starting Echo server on port 8080...")
 	e.Logger.Fatal(e.Start(":8080"))
