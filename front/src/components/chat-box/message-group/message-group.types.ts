@@ -1,8 +1,18 @@
+import type { Message } from '../../../store/chats-store';
+
+export type From = {
+  username?: string;
+  name: string;
+  photoUrl?: string;
+};
+
 export type MessageGroupProps = {
   isFromMe: boolean;
-  from: {
-    name: string;
-    photoUrl?: string;
-  };
-  messages: string[];
+  from: From;
+  messages: Message[];
+};
+
+export type GroupedMessage = {
+  from: From;
+  messages: Message[];
 };

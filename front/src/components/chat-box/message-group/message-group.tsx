@@ -19,7 +19,7 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
         <Flex justifyContent='flex-end'>
           <Flex gap={2} align='flex-end'>
             <Stack pt={1} alignItems='flex-end' pb={1}>
-              {messages.map((text, index) => (
+              {messages.map((message, index) => (
                 <Flex align='center'>
                   <IconButton
                     icon={<DeleteIcon />}
@@ -34,8 +34,9 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
                   <TextMessage
                     direction='start'
                     showBubble={index === messages.length - 1}
+                    timestamp={message.timestamp}
                   >
-                    {text}
+                    {message.content}
                   </TextMessage>
                 </Flex>
               ))}
@@ -51,12 +52,13 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
     <Flex gap={2} align='flex-end'>
       <Avatar name={from.name} src={from.photoUrl} />
       <Stack pt={1} alignItems='flex-start' pb={1}>
-        {messages.map((text, index) => (
+        {messages.map((message, index) => (
           <TextMessage
             direction='end'
             showBubble={index === messages.length - 1}
+            timestamp={message.timestamp}
           >
-            {text}
+            {message.content}
           </TextMessage>
         ))}
       </Stack>

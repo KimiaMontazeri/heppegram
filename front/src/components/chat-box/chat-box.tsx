@@ -22,6 +22,8 @@ import { getImageFromChat, getNameFromChat } from '../../utils/chat';
 import useUserStore from '../../store/user-store';
 import useAppStore from '../../store/app-store';
 import { Message } from '../../store/chats-store';
+import { GroupedMessage } from './message-group/message-group.types';
+import { groupMessagesBySender } from '../../utils/message';
 
 const ChatBox = ({ id }: ChatBoxProps) => {
   const toast = useToast();
@@ -31,6 +33,7 @@ const ChatBox = ({ id }: ChatBoxProps) => {
   const [chatName, setChatName] = useState('');
   const [chatImage, setChatImage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [groupedMessages, setGroupedMessages] = useState<GroupedMessage[]>([]);
 
   useEffect(() => {
     // 👇️ scroll to bottom every time messages change
@@ -57,6 +60,10 @@ const ChatBox = ({ id }: ChatBoxProps) => {
       });
     }
   };
+
+  useEffect(() => {
+    setGroupedMessages(groupMessagesBySender(messages));
+  }, [messages]);
 
   useEffect(() => {
     getChatData();
@@ -86,32 +93,13 @@ const ChatBox = ({ id }: ChatBoxProps) => {
         <Divider />
       </Box>
       <Box>
-        {messages?.map((message) => (
+        {groupedMessages.map((groupedMessage) => (
           <MessageGroup
-            from={{
-              name: `${message.sender.firstname} ${message.sender.lastname}`,
-              photoUrl: message.sender.image,
-            }}
-            isFromMe={message.sender.username === username}
-            messages={[message.content]}
+            from={groupedMessage.from}
+            isFromMe={groupedMessage.from.username === username}
+            messages={groupedMessage.messages}
           />
         ))}
-        {/* <MessageGroup
-          isFromMe
-          from={{
-            name: 'Dan Abrahmov',
-            photoUrl: 'https://bit.ly/dan-abramov',
-          }}
-          messages={['hello', 'how are you?']}
-        />
-        <MessageGroup
-          isFromMe={false}
-          from={{
-            name: 'Kent Dodds',
-            photoUrl: 'https://bit.ly/kent-c-dodds',
-          }}
-          messages={['hi', 'Im fine how are you?', 'blah blah']}
-        /> */}
 
         <div ref={bottomRef} />
         {/* footer */}
