@@ -29,6 +29,7 @@ func main() {
 	}(c)
 
 	e.Use(middleware.Logger())
+	e.Use(middleware.CSRF())
 	e.Use(middleware.CORS())
 	e.Use(echoprometheus.NewMiddleware("heppegram"))
 
