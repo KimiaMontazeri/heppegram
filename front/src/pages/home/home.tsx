@@ -45,6 +45,8 @@ function Home() {
     if (selectedChatData) {
       const user = getUserFromChat(selectedChatData, username);
       setChatDetailsData(user);
+    } else {
+      setChatDetailsData(null);
     }
   };
 

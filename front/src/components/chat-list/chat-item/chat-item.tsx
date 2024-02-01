@@ -12,6 +12,7 @@ import type { ChatItemProps } from './chat-item.types';
 import { DeleteIcon } from '@chakra-ui/icons';
 import { customFetch } from '../../../services/fetch';
 import useChatsStore from '../../../store/chats-store';
+import useAppStore from '../../../store/app-store';
 
 const ChatItem = ({
   id,
@@ -27,6 +28,8 @@ const ChatItem = ({
 
   const setChats = useChatsStore((state) => state.setChats);
   const chats = useChatsStore((state) => state.chats);
+  const setSelectedChat = useAppStore((state) => state.setSelectedChat);
+  const setSelectedChatData = useAppStore((state) => state.setSelectedChatData);
 
   const toast = useToast();
 
@@ -46,6 +49,8 @@ const ChatItem = ({
       // update store
       const filteredChats = chats?.filter((chat) => chat.id !== id);
       setChats(filteredChats || null);
+      setSelectedChat(null);
+      setSelectedChatData(null);
     } else {
       toast({
         title: 'An error occurred while deleting the chat.',
