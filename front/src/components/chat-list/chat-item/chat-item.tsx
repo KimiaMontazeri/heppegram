@@ -2,13 +2,19 @@ import {
   Avatar,
   Badge,
   Flex,
+  IconButton,
   Stack,
   Text,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react';
 import type { ChatItemProps } from './chat-item.types';
+import { DeleteIcon } from '@chakra-ui/icons';
+import { customFetch } from '../../../services/fetch';
+import useChatsStore from '../../../store/chats-store';
 
 const ChatItem = ({
+  id,
   photoUrl,
   name,
   lastMessageText,
@@ -18,6 +24,42 @@ const ChatItem = ({
 }: ChatItemProps) => {
   const selectedBgColor = useColorModeValue('teal.50', 'teal.800');
   const hoverColor = useColorModeValue('teal.50', 'teal.800');
+
+  const setChats = useChatsStore((state) => state.setChats);
+  const chats = useChatsStore((state) => state.chats);
+
+  const toast = useToast();
+
+  const deleteChat = async () => {
+    const { ok } = await customFetch({
+      url: `/api/chats/${id}`,
+      method: 'DELETE',
+    });
+
+    if (ok) {
+      toast({
+        title: 'Chat deleted successfully.',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+      // update store
+      const filteredChats = chats?.filter((chat) => chat.id !== id);
+      setChats(filteredChats || null);
+    } else {
+      toast({
+        title: 'An error occurred while deleting the chat.',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleDeleteChat = () => {
+    deleteChat();
+  };
+
   return (
     <Flex
       justifyContent='space-between'
@@ -39,14 +81,26 @@ const ChatItem = ({
           </Text>
         </Stack>
       </Flex>
-      <Stack alignItems='flex-end'>
-        <Text fontSize='sm' color={useColorModeValue('gray.500', 'gray.300')}>
-          {lastMessageTimestamp}
-        </Text>
-        {unreadMessageCount && (
-          <Badge borderRadius='xl'>{unreadMessageCount}</Badge>
-        )}
-      </Stack>
+      <Flex align='center'>
+        <Stack alignItems='flex-end'>
+          <Text fontSize='sm' color={useColorModeValue('gray.500', 'gray.300')}>
+            {lastMessageTimestamp}
+          </Text>
+          {unreadMessageCount && (
+            <Badge borderRadius='xl'>{unreadMessageCount}</Badge>
+          )}
+        </Stack>
+        <IconButton
+          icon={<DeleteIcon />}
+          colorScheme='red'
+          color='red.400'
+          variant='ghost'
+          isRound
+          aria-label='delete-message'
+          mr={1}
+          onClick={handleDeleteChat}
+        />
+      </Flex>
     </Flex>
   );
 };

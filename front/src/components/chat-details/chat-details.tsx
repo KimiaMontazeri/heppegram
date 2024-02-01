@@ -39,7 +39,7 @@ const ChatDetails = ({
         <ListItem>
           <Text fontSize='sm'>Username</Text>
           <Text fontSize='sm' color={grayTextColor}>
-            {username}
+            @{username}
           </Text>
         </ListItem>
         <Divider my={2} />

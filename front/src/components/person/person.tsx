@@ -11,7 +11,13 @@ import {
 import type { PersonProps } from './person.types';
 import { MinusIcon } from '@chakra-ui/icons';
 
-const Person = ({ name, username, image, isOnline }: PersonProps) => {
+const Person = ({
+  name,
+  username,
+  image,
+  isOnline,
+  showRemoveIcon = true,
+}: PersonProps) => {
   const grayTextColor = useColorModeValue('gray.500', 'gray.300');
   return (
     <Flex justify='space-between' align='center'>
@@ -30,15 +36,17 @@ const Person = ({ name, username, image, isOnline }: PersonProps) => {
           </Text>
         </Stack>
       </Flex>
-      <Tooltip label='Remove'>
-        <IconButton
-          icon={<MinusIcon />}
-          colorScheme='red'
-          size='sm'
-          variant='ghost'
-          aria-label='remove'
-        />
-      </Tooltip>
+      {showRemoveIcon && (
+        <Tooltip label='Remove'>
+          <IconButton
+            icon={<MinusIcon />}
+            colorScheme='red'
+            size='sm'
+            variant='ghost'
+            aria-label='remove'
+          />
+        </Tooltip>
+      )}
     </Flex>
   );
 };

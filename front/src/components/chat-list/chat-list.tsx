@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EditIcon, SearchIcon } from '@chakra-ui/icons';
 import {
   Box,
@@ -20,10 +20,34 @@ import {
 import SearchContactModal from '../search-contact-modal';
 import CreateGroupModal from '../create-group-modal';
 import ChatItem from './chat-item';
+import CreateChatModal from '../create-chat-modal';
+import { ChatListProps } from './chat-list.types';
+import useUserStore from '../../store/user-store';
+import { timestampToHHMM } from '../../utils/time';
+import useAppStore from '../../store/app-store';
+import { getNameFromChat } from '../../utils/chat';
 
-const ChatList = () => {
+const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
+  const username = useUserStore((state) => state.user?.username);
+  const setSelectedChat = useAppStore((state) => state.setSelectedChat);
+
   const [searchContactModalOpen, setSearchContactModalOpen] = useState(false);
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
+  const [createChatModalOpen, setCreateChatModalOpen] = useState(false);
+  const [chatList, setChatList] = useState(chats);
+
+  useEffect(() => {
+    setChatList(chats);
+  }, [chats]);
+
+  const handleSearchChats = (searchValue: string) => {
+    const filteredChatList = chats.filter((chat) => {
+      const name = getNameFromChat(chat, username);
+      return name.startsWith(searchValue);
+    });
+    setChatList(filteredChatList);
+  };
+
   return (
     <Box px={4}>
       <SearchContactModal
@@ -33,6 +57,10 @@ const ChatList = () => {
       <CreateGroupModal
         isOpen={createGroupModalOpen}
         onClose={() => setCreateGroupModalOpen(false)}
+      />
+      <CreateChatModal
+        isOpen={createChatModalOpen}
+        onClose={() => setCreateChatModalOpen(false)}
       />
 
       <Stack
@@ -60,8 +88,11 @@ const ChatList = () => {
                 <MenuItem onClick={() => setSearchContactModalOpen(true)}>
                   Add a new contact
                 </MenuItem>
+                <MenuItem onClick={() => setCreateChatModalOpen(true)}>
+                  Create a chat
+                </MenuItem>
                 <MenuItem onClick={() => setCreateGroupModalOpen(true)}>
-                  Add a new group
+                  Create a group
                 </MenuItem>
               </MenuList>
             </Portal>
@@ -72,24 +103,29 @@ const ChatList = () => {
           <InputLeftElement pointerEvents='none'>
             <SearchIcon />
           </InputLeftElement>
-          <Input type='search' placeholder='Search' />
+          <Input
+            type='search'
+            placeholder='Search'
+            onChange={(e) => handleSearchChats(e.target.value)}
+          />
         </InputGroup>
       </Stack>
-      {/* chat items 👇🏻 */}
-      <ChatItem
-        photoUrl='https://bit.ly/sage-adebayo'
-        name='Segun Adebayo'
-        lastMessageText='How are you?'
-        lastMessageTimestamp='12m'
-        unreadMessageCount={2}
-      />
-      <ChatItem
-        selected
-        photoUrl='https://bit.ly/kent-c-dodds'
-        name='Kent Dodds'
-        lastMessageText='blah blah'
-        lastMessageTimestamp='1h'
-      />
+
+      {chatList.map((chat, index) => (
+        <Box key={index} onClick={() => setSelectedChat(chat.id || null)}>
+          <ChatItem
+            selected={selectedChatId === chat.id}
+            id={chat.id}
+            name={getNameFromChat(chat, username)}
+            lastMessageText={chat.lastMessage?.content}
+            lastMessageTimestamp={
+              chat.lastMessage?.timestamp
+                ? timestampToHHMM(chat.lastMessage?.timestamp)
+                : undefined
+            }
+          />
+        </Box>
+      ))}
     </Box>
   );
 };

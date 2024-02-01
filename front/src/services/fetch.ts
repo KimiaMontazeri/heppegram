@@ -33,7 +33,10 @@ export async function customFetch({
     ...(payload && { body: JSON.stringify(payload) }),
   });
 
-  const responseBody = await response.json();
+  let responseBody = {};
+  if (method !== 'DELETE') {
+    responseBody = await response.json();
+  }
 
   // if (data.status === 401) {
   //   const newToken = await handleRefreshToken();

@@ -3,4 +3,5 @@ export type PersonProps = {
   username: string;
   image?: string;
   isOnline?: boolean;
+  showRemoveIcon?: boolean;
 };

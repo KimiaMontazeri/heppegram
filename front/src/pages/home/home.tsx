@@ -1,18 +1,61 @@
-import { Divider, Stack } from '@chakra-ui/react';
+import { Center, Divider, Stack, Text, useToast } from '@chakra-ui/react';
 import ChatList from '../../components/chat-list';
 import ChatBox from '../../components/chat-box';
 import ChatDetails from '../../components/chat-details';
 import SideBar from '../../components/side-bar';
-import GroupDetails from '../../components/group-details';
+// import GroupDetails from '../../components/group-details';
+import { customFetch } from '../../services/fetch';
+import useChatsStore, { Chats } from '../../store/chats-store';
+import { useEffect, useState } from 'react';
+import useAppStore from '../../store/app-store';
+import useUserStore, { User } from '../../store/user-store';
+import { getUserFromChat } from '../../utils/chat';
 
 function Home() {
-  /* 
-    Get the below items from the store
-    - profile data
-    - current open chat data (if none, show an empty chat box)
-      - messages
-      - other people's data
-  */
+  const toast = useToast();
+  const [chatList, setChatList] = useState<Chats | null>(null);
+  const setChats = useChatsStore((state) => state.setChats);
+  const chats = useChatsStore((state) => state.chats);
+  const username = useUserStore((state) => state.user?.username);
+  const selectedChat = useAppStore((state) => state.selectedChat);
+  const selectedChatData = useAppStore((state) => state.selectedChatData);
+
+  const [chatDetailsData, setChatDetailsData] = useState<User | null>(null);
+
+  const getChats = async () => {
+    const { ok, body } = await customFetch({
+      url: '/api/chats',
+      method: 'GET',
+    });
+
+    if (ok) {
+      setChats(body);
+      setChatList(body);
+    } else {
+      toast({
+        title: 'An error occurred while fetching chats.',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const generateChatDetails = () => {
+    if (selectedChatData) {
+      const user = getUserFromChat(selectedChatData, username);
+      setChatDetailsData(user);
+    }
+  };
+
+  useEffect(() => {
+    generateChatDetails();
+  }, [selectedChatData]);
+
+  useEffect(() => {
+    getChats();
+  }, []);
+
   return (
     <Stack
       flexDirection='row'
@@ -26,22 +69,41 @@ function Home() {
       </Stack>
       <Divider orientation='vertical' />
       <Stack flexGrow={1}>
-        <ChatList />
+        {chats ? (
+          <ChatList selectedChatId={selectedChat} chats={chats} />
+        ) : chatList && chatList.length !== 0 ? (
+          <ChatList selectedChatId={selectedChat} chats={chatList} />
+        ) : (
+          <Center p={4}>
+            <Text>You have no chats!</Text>
+          </Center>
+        )}
       </Stack>
       <Divider orientation='vertical' />
       <Stack flexGrow={2}>
-        <ChatBox />
+        {selectedChat && <ChatBox id={selectedChat} />}
       </Stack>
       <Divider orientation='vertical' />
       <Stack flexGrow={1}>
-        <ChatDetails
-          name='Kent Dodds'
-          image='https://bit.ly/kent-c-dodds'
-          isOnline
-          username='@kentdodds'
-          phone='09123484996'
-          bio='I`m so cool!'
-        />
+        {chatDetailsData && (
+          <ChatDetails
+            name={`${chatDetailsData.firstname} ${chatDetailsData.lastname}`}
+            image={chatDetailsData.image}
+            username={chatDetailsData.username}
+            phone={chatDetailsData.phone}
+            bio={chatDetailsData.bio}
+            // TODO:
+            isOnline={false}
+          />
+        )}
+        {/* <ChatDetails
+        name='Kent Dodds'
+        image='https://bit.ly/kent-c-dodds'
+        isOnline
+        username='@kentdodds'
+        phone='09123484996'
+        bio='I`m so cool!'
+        /> */}
         {/* <GroupDetails
           groupImage='https://bit.ly/kent-c-dodds'
           groupName='group'
