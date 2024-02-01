@@ -54,6 +54,7 @@ func main() {
 	user.POST("/register", userHandler.Register)
 	user.POST("/login", userHandler.Login)
 
+	// Users Handlers
 	users.GET("", userHandler.SearchUsers)
 	users.GET("/:username", userHandler.GetUser, middle.JWTAuthentication)
 	users.PATCH("/:username", userHandler.UpdateUser, middle.JWTAuthentication)
