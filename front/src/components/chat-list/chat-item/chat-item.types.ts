@@ -1,4 +1,5 @@
 export type ChatItemProps = {
+  id?: number;
   photoUrl?: string;
   name: string;
   lastMessageText?: string;

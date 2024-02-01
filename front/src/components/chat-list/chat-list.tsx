@@ -109,6 +109,7 @@ const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
         <Box key={index} onClick={() => setSelectedChat(chat.id || null)}>
           <ChatItem
             selected={selectedChatId === chat.id}
+            id={chat.id}
             name={getNameFromChat(chat, username)}
             lastMessageText={chat.lastMessage?.content}
             lastMessageTimestamp={
