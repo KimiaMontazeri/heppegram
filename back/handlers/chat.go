@@ -28,8 +28,9 @@ type ChatCreateDTO struct {
 }
 
 type ChatResponseDTO struct {
-	ID     uint              `json:"id"`
-	People []UserResponseDTO `json:"people"`
+	ID       uint              `json:"id"`
+	People   []UserResponseDTO `json:"people"`
+	Messages []MessageDTO      `json:"messages"`
 }
 
 type ChatPreviewDTO struct {
@@ -146,6 +147,11 @@ func (h *ChatHandler) GetChats(c echo.Context) error {
 }
 
 func (h *ChatHandler) GetChat(c echo.Context) error {
+	authUsername, ok := c.Get("username").(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "User not authenticated")
+	}
+
 	id, err := strconv.ParseUint(c.Param("chat_id"), 10, 32)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid chat ID")
@@ -159,7 +165,68 @@ func (h *ChatHandler) GetChat(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Chat not found")
 	}
 
-	return c.JSON(http.StatusOK, chat)
+	isParticipant := false
+	for _, user := range chat.People {
+		if user.Username == authUsername {
+			isParticipant = true
+			break
+		}
+	}
+	if !isParticipant {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied to the chat")
+	}
+
+	messages, err := h.MessageRepo.FindMessagesByChatID(uint(id))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error fetching messages")
+	}
+
+	messageDTOs := make([]MessageDTO, len(messages))
+	for i, message := range messages {
+		sender, err := h.UserRepo.FindByID(message.SenderID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error fetching user details for message sender")
+		}
+		if sender == nil {
+			return echo.NewHTTPError(http.StatusNotFound, "Sender not found")
+		}
+
+		senderDTO := UserResponseDTO{
+			ID:        sender.ID,
+			Firstname: sender.Firstname,
+			Lastname:  sender.Lastname,
+			Phone:     sender.Phone,
+			Username:  sender.Username,
+			Bio:       sender.Bio,
+		}
+
+		messageDTOs[i] = MessageDTO{
+			ID:        message.ID,
+			Sender:    senderDTO,
+			Content:   message.Content,
+			Timestamp: message.CreatedAt,
+		}
+	}
+
+	peopleDTOs := make([]UserResponseDTO, len(chat.People))
+	for i, user := range chat.People {
+		peopleDTOs[i] = UserResponseDTO{
+			ID:        user.ID,
+			Firstname: user.Firstname,
+			Lastname:  user.Lastname,
+			Phone:     user.Phone,
+			Username:  user.Username,
+			Bio:       user.Bio,
+		}
+	}
+
+	chatResponseDTO := ChatResponseDTO{
+		ID:       chat.ID,
+		People:   peopleDTOs,
+		Messages: messageDTOs,
+	}
+
+	return c.JSON(http.StatusOK, chatResponseDTO)
 }
 
 func (h *ChatHandler) DeleteChat(c echo.Context) error {

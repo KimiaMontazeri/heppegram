@@ -25,3 +25,12 @@ func (repo *Message) FindLatestMessageByChatID(chatID uint) (*models.Message, er
 	}
 	return &message, nil
 }
+
+func (repo *Message) FindMessagesByChatID(chatID uint) ([]*models.Message, error) {
+	var messages []*models.Message
+	result := repo.db.Where("chat_id = ?", chatID).Order("created_at DESC").Find(&messages)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return messages, nil
+}
