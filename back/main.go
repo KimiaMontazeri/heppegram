@@ -6,8 +6,10 @@ import (
 	middle "github.com/KimiaMontazeri/heppegram/back/middleware"
 	"github.com/KimiaMontazeri/heppegram/back/repository/gorm"
 	"github.com/labstack/echo-contrib/echoprometheus"
+	"github.com/labstack/echo-contrib/jaegertracing"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -17,6 +19,14 @@ func main() {
 	time.Sleep(5 * time.Second)
 	db.Init()
 	e := echo.New()
+
+	c := jaegertracing.New(e, nil)
+	defer func(c io.Closer) {
+		err := c.Close()
+		if err != nil {
+			log.Printf("Failed to close tracer: %v\n", err)
+		}
+	}(c)
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORS())
