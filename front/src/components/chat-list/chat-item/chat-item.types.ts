@@ -1,8 +1,8 @@
 export type ChatItemProps = {
-  photoUrl: string;
+  photoUrl?: string;
   name: string;
-  lastMessageText: string;
-  lastMessageTimestamp: string;
+  lastMessageText?: string;
+  lastMessageTimestamp?: string;
   unreadMessageCount?: number;
   selected?: boolean;
 };

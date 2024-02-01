@@ -1,18 +1,44 @@
-import { Divider, Stack } from '@chakra-ui/react';
+import { Center, Divider, Stack, Text, useToast } from '@chakra-ui/react';
 import ChatList from '../../components/chat-list';
-import ChatBox from '../../components/chat-box';
-import ChatDetails from '../../components/chat-details';
+// import ChatBox from '../../components/chat-box';
+// import ChatDetails from '../../components/chat-details';
 import SideBar from '../../components/side-bar';
-import GroupDetails from '../../components/group-details';
+// import GroupDetails from '../../components/group-details';
+import { customFetch } from '../../services/fetch';
+import useChatsStore, { Chats } from '../../store/chats-store';
+import { useEffect, useState } from 'react';
+import useAppStore from '../../store/app-store';
 
 function Home() {
-  /* 
-    Get the below items from the store
-    - profile data
-    - current open chat data (if none, show an empty chat box)
-      - messages
-      - other people's data
-  */
+  const toast = useToast();
+  const [chatList, setChatList] = useState<Chats | null>(null);
+  const setChats = useChatsStore((state) => state.setChats);
+  const chats = useChatsStore((state) => state.chats);
+  const selectedChat = useAppStore((state) => state.selectedChat);
+
+  const getChats = async () => {
+    const { ok, body } = await customFetch({
+      url: '/api/chats',
+      method: 'GET',
+    });
+
+    if (ok) {
+      setChats(body);
+      setChatList(body);
+    } else {
+      toast({
+        title: 'An error occurred while fetching chats.',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  useEffect(() => {
+    getChats();
+  }, []);
+
   return (
     <Stack
       flexDirection='row'
@@ -26,14 +52,23 @@ function Home() {
       </Stack>
       <Divider orientation='vertical' />
       <Stack flexGrow={1}>
-        <ChatList />
+        {chats ? (
+          <ChatList selectedChatId={selectedChat} chats={chats} />
+        ) : chatList && chatList.length !== 0 ? (
+          <ChatList selectedChatId={selectedChat} chats={chatList} />
+        ) : (
+          <Center p={4}>
+            <Text>You have no chats!</Text>
+          </Center>
+        )}
+        {/* {chatList && <ChatList chats={chatList} />} */}
       </Stack>
       <Divider orientation='vertical' />
-      <Stack flexGrow={2}>
+      {/* <Stack flexGrow={2}>
         <ChatBox />
-      </Stack>
+      </Stack> */}
       <Divider orientation='vertical' />
-      <Stack flexGrow={1}>
+      {/* <Stack flexGrow={1}>
         <ChatDetails
           name='Kent Dodds'
           image='https://bit.ly/kent-c-dodds'
@@ -42,11 +77,11 @@ function Home() {
           phone='09123484996'
           bio='I`m so cool!'
         />
-        {/* <GroupDetails
+        <GroupDetails
           groupImage='https://bit.ly/kent-c-dodds'
           groupName='group'
-        /> */}
-      </Stack>
+        />
+      </Stack> */}
     </Stack>
   );
 }

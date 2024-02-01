@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 
-interface User {
+export type User = {
   username?: string;
   id?: number;
   firstname?: string;
   lastname?: string;
   image?: string;
-}
+};
 
 interface UserState {
   user: User | null;
