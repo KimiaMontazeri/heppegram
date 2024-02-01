@@ -12,15 +12,22 @@ import {
   useColorMode,
 } from '@chakra-ui/react';
 import ProfileModal from '../profile-modal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ContactsModal from '../contacts-modal';
 import { removeToken } from '../../services/token';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from '../../store/user-store';
+import { getUsername, removeUsername } from '../../services/user';
+import { customFetch } from '../../services/fetch';
 
 const SideBar = () => {
   const navigate = useNavigate();
   const setUser = useUserStore((state) => state.setUser);
+
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
+  const [image, setImage] = useState('');
+
   const { colorMode, toggleColorMode } = useColorMode();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [contactsModalOpen, setContactsModalOpen] = useState(false);
@@ -29,9 +36,38 @@ const SideBar = () => {
 
   const handleLogout = () => {
     removeToken();
+    removeUsername();
     setUser(null);
     navigate('/login');
   };
+
+  const handleGetProfile = async () => {
+    const username = getUsername();
+    const { ok, body } = await customFetch({
+      url: `/api/users/${username}`,
+      method: 'GET',
+    });
+
+    if (ok) {
+      const { ID, Firstname, Lastname, Image, Username } = body;
+      setFirstname(Firstname);
+      setLastname(Lastname);
+      setImage(Image);
+
+      // update the store as well
+      setUser({
+        id: ID,
+        username: Username,
+        firstname: Firstname,
+        lastname: Lastname,
+        image: Image,
+      });
+    }
+  };
+
+  useEffect(() => {
+    handleGetProfile();
+  }, []);
 
   return (
     <Stack
@@ -52,8 +88,8 @@ const SideBar = () => {
       <Menu>
         <MenuButton>
           <Avatar
-            name='Dan Abrahmov'
-            src='https://bit.ly/dan-abramov'
+            name={`${firstname} ${lastname}`}
+            src={image || ''}
             style={{ cursor: 'pointer' }}
             onClick={() => setProfileModalOpen(true)}
           >
