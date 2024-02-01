@@ -85,32 +85,24 @@ function Home() {
       <Stack flexGrow={2}>
         {selectedChat && <ChatBox id={selectedChat} />}
       </Stack>
-      <Divider orientation='vertical' />
-      <Stack flexGrow={1}>
-        {chatDetailsData && (
-          <ChatDetails
-            name={`${chatDetailsData.firstname} ${chatDetailsData.lastname}`}
-            image={chatDetailsData.image}
-            username={chatDetailsData.username}
-            phone={chatDetailsData.phone}
-            bio={chatDetailsData.bio}
-            // TODO:
-            isOnline={false}
-          />
-        )}
-        {/* <ChatDetails
-        name='Kent Dodds'
-        image='https://bit.ly/kent-c-dodds'
-        isOnline
-        username='@kentdodds'
-        phone='09123484996'
-        bio='I`m so cool!'
-        /> */}
-        {/* <GroupDetails
-          groupImage='https://bit.ly/kent-c-dodds'
-          groupName='group'
-        /> */}
-      </Stack>
+      {chatDetailsData && (
+        <>
+          <Divider orientation='vertical' />
+          <Stack flexGrow={1}>
+            {chatDetailsData && (
+              <ChatDetails
+                name={`${chatDetailsData.firstname} ${chatDetailsData.lastname}`}
+                image={chatDetailsData.image}
+                username={chatDetailsData.username}
+                phone={chatDetailsData.phone}
+                bio={chatDetailsData.bio}
+                // TODO:
+                isOnline={false}
+              />
+            )}
+          </Stack>
+        </>
+      )}
     </Stack>
   );
 }
