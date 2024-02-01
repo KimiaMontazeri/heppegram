@@ -22,21 +22,10 @@ import CreateGroupModal from '../create-group-modal';
 import ChatItem from './chat-item';
 import CreateChatModal from '../create-chat-modal';
 import { ChatListProps } from './chat-list.types';
-import { Chat } from '../../store/chats-store';
 import useUserStore from '../../store/user-store';
 import { timestampToHHMM } from '../../utils/time';
 import useAppStore from '../../store/app-store';
-
-const getNameFromChat = (chat: Chat, username: string | undefined) => {
-  let name;
-  const { people } = chat;
-  people?.map((person) => {
-    if (person.username !== username) {
-      name = `${person.firstname} ${person.lastname}`;
-    }
-  });
-  return name || String(chat.id);
-};
+import { getNameFromChat } from '../../utils/chat';
 
 const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
   const username = useUserStore((state) => state.user?.username);

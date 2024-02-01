@@ -6,6 +6,7 @@ export type Message = {
   sender: User;
   content: string;
   timestamp: number;
+  // TODO: chatID
 };
 
 export type Chat = {

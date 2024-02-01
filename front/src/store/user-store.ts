@@ -6,6 +6,8 @@ export type User = {
   firstname?: string;
   lastname?: string;
   image?: string;
+  phone?: string;
+  bio?: string;
 };
 
 interface UserState {

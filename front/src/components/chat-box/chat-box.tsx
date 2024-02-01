@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowForwardIcon, AttachmentIcon } from '@chakra-ui/icons';
 import {
   Avatar,
@@ -12,17 +12,55 @@ import {
   InputRightElement,
   Stack,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react';
 import MessageGroup from './message-group';
 import ChatSettings from './chat-settings';
+import type { ChatBoxProps } from './chat-box.types';
+import { customFetch } from '../../services/fetch';
+import { getImageFromChat, getNameFromChat } from '../../utils/chat';
+import useUserStore from '../../store/user-store';
+import useAppStore from '../../store/app-store';
+import { Message } from '../../store/chats-store';
 
-const ChatBox = () => {
+const ChatBox = ({ id }: ChatBoxProps) => {
+  const toast = useToast();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const setSelectedChatData = useAppStore((state) => state.setSelectedChatData);
+  const username = useUserStore((state) => state.user?.username);
+  const [chatName, setChatName] = useState('');
+  const [chatImage, setChatImage] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     // 👇️ scroll to bottom every time messages change
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []); // TODO: every time we get a new message, we should run this effect
+
+  const getChatData = async () => {
+    const { ok, body } = await customFetch({
+      url: `/api/chats/${id}`,
+      method: 'GET',
+    });
+
+    if (ok) {
+      setChatName(getNameFromChat(body, username));
+      setChatImage(getImageFromChat(body, username));
+      setMessages(body.messages);
+      setSelectedChatData(body);
+    } else {
+      toast({
+        title: 'An error occurred while fetching chat data.',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  useEffect(() => {
+    getChatData();
+  }, []);
 
   return (
     <Stack
@@ -38,9 +76,9 @@ const ChatBox = () => {
       >
         <Flex justify='space-between' align='center'>
           <Flex alignItems='center' gap={2} py={4}>
-            <Avatar name='Kent Dodds' src='https://bit.ly/kent-c-dodds' />
+            <Avatar name={chatName} src={chatImage} />
             <Heading as='h2' size='md'>
-              Kent Dodds
+              {chatName}
             </Heading>
           </Flex>
           <ChatSettings />
@@ -48,7 +86,17 @@ const ChatBox = () => {
         <Divider />
       </Box>
       <Box>
-        <MessageGroup
+        {messages?.map((message) => (
+          <MessageGroup
+            from={{
+              name: `${message.sender.firstname} ${message.sender.lastname}`,
+              photoUrl: message.sender.image,
+            }}
+            isFromMe={message.sender.username === username}
+            messages={[message.content]}
+          />
+        ))}
+        {/* <MessageGroup
           isFromMe
           from={{
             name: 'Dan Abrahmov',
@@ -63,7 +111,7 @@ const ChatBox = () => {
             photoUrl: 'https://bit.ly/kent-c-dodds',
           }}
           messages={['hi', 'Im fine how are you?', 'blah blah']}
-        />
+        /> */}
 
         <div ref={bottomRef} />
         {/* footer */}
