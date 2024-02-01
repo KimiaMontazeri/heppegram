@@ -1,0 +1,8 @@
+.startBubble {
+  transform: scale(-1, 1);
+  right: -8px;
+}
+
+.endBubble {
+  left: -8px;
+}
