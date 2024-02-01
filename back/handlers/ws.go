@@ -63,16 +63,18 @@ func (manager *WSManager) run() {
 	for {
 		select {
 		case userConn := <-manager.register:
+			log.Println("registering connection to user: ", userConn.UserID)
 			manager.clientsMu.Lock()
 			manager.clients[userConn.UserID] = &WSConn{Conn: userConn.Conn}
 			manager.clientsMu.Unlock()
 		case userID := <-manager.unregister:
+			log.Println("unregistering connection to user: ", userID)
 			manager.clientsMu.Lock()
 			if conn, ok := manager.clients[userID]; ok {
 				delete(manager.clients, userID)
 				err := conn.Conn.Close()
 				if err != nil {
-					return
+					log.Println("error closing connection:", err)
 				}
 			}
 			manager.clientsMu.Unlock()
@@ -112,6 +114,7 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 		return err
 	}
 	defer func(ws *websocket.Conn) {
+		log.Println("closing primary connection")
 		err := ws.Close()
 		if err != nil {
 			log.Printf("Failed to close the WebSocket connection: %v\n", err)
@@ -134,6 +137,8 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 
 	h.WSManager.register <- &UserConn{UserID: user.ID, Conn: ws}
 	defer func() { h.WSManager.unregister <- user.ID }()
+
+	log.Println("registered as user: ", user.Username)
 
 	for {
 		var msgRequest MessageRequest
