@@ -45,6 +45,15 @@ const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
   const [searchContactModalOpen, setSearchContactModalOpen] = useState(false);
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   const [createChatModalOpen, setCreateChatModalOpen] = useState(false);
+  const [chatList, setChatList] = useState(chats);
+
+  const handleSearchChats = (searchValue: string) => {
+    const filteredChatList = chats.filter((chat) => {
+      const name = getNameFromChat(chat, username);
+      return name.startsWith(searchValue);
+    });
+    setChatList(filteredChatList);
+  };
 
   return (
     <Box px={4}>
@@ -101,11 +110,15 @@ const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
           <InputLeftElement pointerEvents='none'>
             <SearchIcon />
           </InputLeftElement>
-          <Input type='search' placeholder='Search' />
+          <Input
+            type='search'
+            placeholder='Search'
+            onChange={(e) => handleSearchChats(e.target.value)}
+          />
         </InputGroup>
       </Stack>
 
-      {chats.map((chat, index) => (
+      {chatList.map((chat, index) => (
         <Box key={index} onClick={() => setSelectedChat(chat.id || null)}>
           <ChatItem
             selected={selectedChatId === chat.id}
@@ -120,20 +133,6 @@ const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
           />
         </Box>
       ))}
-      {/* <ChatItem
-        photoUrl='https://bit.ly/sage-adebayo'
-        name='Segun Adebayo'
-        lastMessageText='How are you?'
-        lastMessageTimestamp='12m'
-        unreadMessageCount={2}
-      />
-      <ChatItem
-        selected
-        photoUrl='https://bit.ly/kent-c-dodds'
-        name='Kent Dodds'
-        lastMessageText='blah blah'
-        lastMessageTimestamp='1h'
-      /> */}
     </Box>
   );
 };
