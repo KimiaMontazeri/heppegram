@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EditIcon, SearchIcon } from '@chakra-ui/icons';
 import {
   Box,
@@ -46,6 +46,10 @@ const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   const [createChatModalOpen, setCreateChatModalOpen] = useState(false);
   const [chatList, setChatList] = useState(chats);
+
+  useEffect(() => {
+    setChatList(chats);
+  }, [chats]);
 
   const handleSearchChats = (searchValue: string) => {
     const filteredChatList = chats.filter((chat) => {
