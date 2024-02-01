@@ -32,7 +32,7 @@ const SecondStep = ({ username, password }: SecondStepProps) => {
 
   const handleRegister = async () => {
     const { ok } = await customFetch({
-      url: `/api/register`,
+      url: `/api/user/register`,
       method: 'POST',
       payload: {
         firstname,

@@ -36,7 +36,7 @@ function Login() {
   const handleLogin = async () => {
     setLoading(true);
     const { ok, status, body } = await customFetch({
-      url: `/api/login`,
+      url: `/api/user/login`,
       method: 'POST',
       payload: {
         username,
