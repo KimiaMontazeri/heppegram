@@ -76,7 +76,7 @@ function Home() {
         ) : chatList && chatList.length !== 0 ? (
           <ChatList selectedChatId={selectedChat} chats={chatList} />
         ) : (
-          <Center p={4}>
+          <Center p={4} color='purple.500'>
             <Text>You have no chats!</Text>
           </Center>
         )}
@@ -87,7 +87,7 @@ function Home() {
           <ChatBox id={selectedChat} />
         ) : (
           <Center height='100vh'>
-            <Text fontSize='lg' color='yellow.500'>
+            <Text fontSize='lg' color='purple.500'>
               No chat selected!
             </Text>
           </Center>

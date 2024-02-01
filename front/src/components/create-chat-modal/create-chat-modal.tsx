@@ -34,7 +34,7 @@ const SearchContactModal = ({ isOpen, onClose }: CreateChatModalProps) => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [users, setUsers] = useState<User[] | null>(null);
   const grayColor = useColorModeValue('gray.100', 'gray.700');
-  const hoveredBgColor = useColorModeValue('teal.50', 'teal.800');
+  const hoveredBgColor = useColorModeValue('purple.50', 'purple.800');
 
   const handleCreateChat = async (selectedUsername: string) => {
     const { ok, body } = await customFetch({

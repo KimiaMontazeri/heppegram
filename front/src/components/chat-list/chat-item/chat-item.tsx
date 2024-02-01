@@ -23,8 +23,8 @@ const ChatItem = ({
   unreadMessageCount,
   selected = false,
 }: ChatItemProps) => {
-  const selectedBgColor = useColorModeValue('teal.50', 'teal.800');
-  const hoverColor = useColorModeValue('teal.50', 'teal.800');
+  const selectedBgColor = useColorModeValue('purple.50', 'purple.800');
+  const hoverColor = useColorModeValue('purple.50', 'purple.800');
 
   const setChats = useChatsStore((state) => state.setChats);
   const chats = useChatsStore((state) => state.chats);

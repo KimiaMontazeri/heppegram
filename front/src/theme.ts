@@ -11,7 +11,7 @@ const config: ThemeConfig = {
 };
 
 const colors = {
-  primary: baseTheme.colors.teal,
+  primary: baseTheme.colors.purple,
 };
 
 export const theme = extendTheme(
