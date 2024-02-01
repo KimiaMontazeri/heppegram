@@ -14,6 +14,11 @@ func NewMessageRepo(db *gorm.DB) *Message {
 	return &Message{db: db}
 }
 
+func (repo *Message) Create(message *models.Message) error {
+	result := repo.db.Create(message)
+	return result.Error
+}
+
 func (repo *Message) FindLatestMessageByChatID(chatID uint) (*models.Message, error) {
 	var message models.Message
 	result := repo.db.Where("chat_id = ?", chatID).Order("created_at DESC").First(&message)

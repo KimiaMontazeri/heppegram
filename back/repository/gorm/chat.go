@@ -46,6 +46,20 @@ func (repo *Chat) FindByID(id uint) (*models.Chat, error) {
 	return &chat, result.Error
 }
 
+func (repo *Chat) GetUserIDsInChat(id uint) ([]uint, error) {
+	var userIDs []uint
+	chat, err := repo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, user := range chat.People {
+		userIDs = append(userIDs, user.ID)
+	}
+
+	return userIDs, nil
+}
+
 func (repo *Chat) Delete(id uint) error {
 	result := repo.db.Delete(&models.Chat{}, id)
 	return result.Error

@@ -43,8 +43,10 @@ func main() {
 	userRepo := gorm.NewUserRepo(db.DB)
 	chatRepo := gorm.NewChatRepo(db.DB)
 	messageRepo := gorm.NewMessageRepo(db.DB)
+	wsManager := handlers.NewWSManager()
 	userHandler := handlers.NewUserHandler(userRepo)
 	chatHandler := handlers.NewChatHandler(chatRepo, userRepo, messageRepo)
+	wsHandler := handlers.NewWSHandler(chatRepo, userRepo, messageRepo, wsManager)
 
 	e.GET("/healthz", func(c echo.Context) error { return c.NoContent(http.StatusNoContent) })
 
@@ -73,7 +75,7 @@ func main() {
 
 	ws := e.Group("/ws")
 	ws.Use(customMiddleware.JWTAuthentication)
-	ws.GET("", chatHandler.HandleWebSocket)
+	ws.GET("", wsHandler.HandleWS)
 
 	log.Println("Starting Echo server on port 8080...")
 	e.Logger.Fatal(e.Start(":8080"))
