@@ -57,20 +57,22 @@ func main() {
 
 	users.Use(customMiddleware.JWTAuthentication)
 	users.GET("", userHandler.SearchUsers)
-	users.GET("/:username", userHandler.GetUser, customMiddleware.JWTAuthentication)
-	users.PATCH("/:username", userHandler.UpdateUser, customMiddleware.JWTAuthentication)
-	users.DELETE("/:username", userHandler.DeleteUser, customMiddleware.JWTAuthentication)
+	users.GET("/:username", userHandler.GetUser)
+	users.PATCH("/:username", userHandler.UpdateUser)
+	users.DELETE("/:username", userHandler.DeleteUser)
 
 	// Chat Handlers
 	chat := api.Group("/chats")
-	chat.POST("", chatHandler.CreateChat, customMiddleware.JWTAuthentication)
-	chat.GET("", chatHandler.GetChats, customMiddleware.JWTAuthentication)
-	chat.GET("/:chat_id", chatHandler.GetChat, customMiddleware.JWTAuthentication)
-	chat.DELETE("/:chat_id", chatHandler.DeleteChat, customMiddleware.JWTAuthentication)
-	chat.DELETE("/:chat_id/messages/:message_id", chatHandler.DeleteMessage, customMiddleware.JWTAuthentication)
+	chat.Use(customMiddleware.JWTAuthentication)
+	chat.POST("", chatHandler.CreateChat)
+	chat.GET("", chatHandler.GetChats)
+	chat.GET("/:chat_id", chatHandler.GetChat)
+	chat.DELETE("/:chat_id", chatHandler.DeleteChat)
+	chat.DELETE("/:chat_id/messages/:message_id", chatHandler.DeleteMessage)
 
 	ws := e.Group("/ws")
-	ws.GET("", chatHandler.HandleWebSocket, customMiddleware.JWTAuthentication)
+	ws.Use(customMiddleware.JWTAuthentication)
+	ws.GET("", chatHandler.HandleWebSocket)
 
 	log.Println("Starting Echo server on port 8080...")
 	e.Logger.Fatal(e.Start(":8080"))
