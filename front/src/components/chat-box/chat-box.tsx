@@ -141,12 +141,13 @@ const ChatBox = ({ id }: ChatBoxProps) => {
   useEffect(() => {
     const tempChats = chats;
     if (tempChats) {
-      const foundIndex = tempChats.findIndex((chat) => chat.id === id);
-      if (foundIndex && foundIndex !== -1) {
-        const foundChat = tempChats[foundIndex];
+      const foundChat = tempChats.find((chat) => chat.id === id);
+      if (foundChat) {
         foundChat.unreadMessageCount = 0;
-        tempChats[foundIndex] = foundChat;
-        setChats(tempChats);
+
+        const filtered = tempChats.filter((chat) => chat.id !== id);
+
+        setChats([...filtered, foundChat]);
       }
     }
     getChatData();

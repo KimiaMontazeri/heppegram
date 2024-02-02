@@ -73,34 +73,32 @@ function Home() {
     if (lastJsonMessage) {
       console.log({ lastJsonMessage });
       const { sender, content, timestamp, chatID } = lastJsonMessage;
-      if (chatID !== selectedChat) {
-        const foundChatIndex = chatsTemp?.findIndex(
-          (chat) => chat.id === chatID,
-        );
-        if (foundChatIndex && foundChatIndex !== -1 && chatsTemp) {
-          const foundChat = chatsTemp[foundChatIndex];
-          foundChat.unreadMessageCount =
-            (foundChat.unreadMessageCount || 0) + 1;
-          foundChat.lastMessage = content;
-          chatsTemp[foundChatIndex] = foundChat;
-          console.log({ foundChat });
-          console.log({ chatsTemp });
-          setChats(chatsTemp);
-          setChatList(chatsTemp);
-        } else if (user) {
-          chatsTemp?.push({
-            id: chatID,
-            people: [user, sender as User],
-            lastMessage: {
-              content,
-              timestamp,
-              sender: {},
-            },
-            unreadMessageCount: 1,
-          });
-          setChats(chatsTemp);
-          setChatList(chatsTemp);
-        }
+      const foundChatIndex = chatsTemp?.findIndex((chat) => chat.id === chatID);
+      if (foundChatIndex && foundChatIndex !== -1 && chatsTemp) {
+        console.log('here');
+        const foundChat = chatsTemp[foundChatIndex];
+        foundChat.unreadMessageCount =
+          chatID !== selectedChat ? (foundChat.unreadMessageCount || 0) + 1 : 0;
+        foundChat.lastMessage = { content: content, sender, timestamp };
+
+        const filtered = chatsTemp.filter((chat) => chat.id !== foundChat.id);
+
+        console.log({ foundChat });
+        console.log({ chatsTemp });
+        setChats([...filtered, foundChat]);
+        setChatList([...filtered, foundChat]);
+      } else if (user) {
+        chatsTemp?.push({
+          id: chatID,
+          people: [user, sender as User],
+          lastMessage: {
+            content,
+            timestamp,
+            sender: {},
+          },
+          unreadMessageCount: 1,
+        });
+        setChatList(chatsTemp);
       }
     }
   }, [lastJsonMessage]);
@@ -124,12 +122,10 @@ function Home() {
       <Stack flexGrow={1}>
         {chats ? (
           <ChatList selectedChatId={selectedChat} chats={chats} />
-        ) : chatList && chatList.length !== 0 ? (
-          <ChatList selectedChatId={selectedChat} chats={chatList} />
         ) : (
-          <Center p={4} color='purple.500'>
-            <Text>You have no chats!</Text>
-          </Center>
+          chatList && (
+            <ChatList selectedChatId={selectedChat} chats={chatList} />
+          )
         )}
       </Stack>
       <Divider orientation='vertical' />

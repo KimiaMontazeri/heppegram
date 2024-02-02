@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { EditIcon, SearchIcon } from '@chakra-ui/icons';
 import {
   Box,
+  Center,
+  Text,
   Divider,
   Flex,
   Heading,
@@ -41,10 +43,7 @@ const ChatList = ({ selectedChatId, chats }: ChatListProps) => {
 
   useEffect(() => {
     setChatList(chats);
-    console.log('chats changed in chat list');
   }, [chats]);
-
-  console.log('chat list');
 
   const handleSearchChats = (searchValue: string) => {
     const filteredChatList = chats?.filter((chat) => {
@@ -125,22 +124,28 @@ const ChatList = ({ selectedChatId, chats }: ChatListProps) => {
         </InputGroup>
       </Stack>
 
-      {chatList?.map((chat, index) => (
-        <Box key={index} onClick={() => setSelectedChat(chat.id || null)}>
-          <ChatItem
-            selected={selectedChatId === chat.id}
-            id={chat.id}
-            name={getNameFromChat(chat, username)}
-            lastMessageText={chat.lastMessage?.content}
-            lastMessageTimestamp={
-              chat.lastMessage?.timestamp
-                ? timestampToHHMM(chat.lastMessage?.timestamp)
-                : undefined
-            }
-            unreadMessageCount={getUnreadMessageCount(chat)}
-          />
-        </Box>
-      ))}
+      {chatList ? (
+        chatList?.map((chat, index) => (
+          <Box key={index} onClick={() => setSelectedChat(chat.id || null)}>
+            <ChatItem
+              selected={selectedChatId === chat.id}
+              id={chat.id}
+              name={getNameFromChat(chat, username)}
+              lastMessageText={chat.lastMessage?.content}
+              lastMessageTimestamp={
+                chat.lastMessage?.timestamp
+                  ? timestampToHHMM(chat.lastMessage?.timestamp)
+                  : undefined
+              }
+              unreadMessageCount={getUnreadMessageCount(chat)}
+            />
+          </Box>
+        ))
+      ) : (
+        <Center p={4} color='purple.500'>
+          <Text>You have no chats!</Text>
+        </Center>
+      )}
     </Box>
   );
 };
