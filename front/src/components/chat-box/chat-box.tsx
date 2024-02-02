@@ -21,21 +21,64 @@ import { customFetch } from '../../services/fetch';
 import { getImageFromChat, getNameFromChat } from '../../utils/chat';
 import useUserStore from '../../store/user-store';
 import useAppStore from '../../store/app-store';
-import { Message } from '../../store/chats-store';
+import useChatsStore, { Message } from '../../store/chats-store';
+import { GroupedMessage } from './message-group/message-group.types';
+import { groupMessagesBySender } from '../../utils/message';
+import useCustomWebSocket from '../../hooks/user-custom-web-socket';
 
 const ChatBox = ({ id }: ChatBoxProps) => {
   const toast = useToast();
   const bottomRef = useRef<HTMLDivElement>(null);
+  // for updating chat's unread message count
+  const chats = useChatsStore((state) => state.chats);
+  const setChats = useChatsStore((state) => state.setChats);
+  const setSelectedChat = useAppStore((state) => state.setSelectedChat);
   const setSelectedChatData = useAppStore((state) => state.setSelectedChatData);
+
   const username = useUserStore((state) => state.user?.username);
   const [chatName, setChatName] = useState('');
   const [chatImage, setChatImage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [groupedMessages, setGroupedMessages] = useState<GroupedMessage[]>([]);
+  const [messageText, setMessageText] = useState('');
+  const { sendJsonMessage, lastJsonMessage } = useCustomWebSocket();
+
+  const deleteChat = async () => {
+    const { ok } = await customFetch({
+      url: `/api/chats/${id}`,
+      method: 'DELETE',
+    });
+
+    if (ok) {
+      toast({
+        title: 'Chat deleted successfully.',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+      // update store
+      const filteredChats = chats?.filter((chat) => chat.id !== id);
+      setChats(filteredChats || null);
+      setSelectedChat(null);
+      setSelectedChatData(null);
+    } else {
+      toast({
+        title: 'An error occurred while deleting the chat.',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleDeleteChat = () => {
+    deleteChat();
+  };
 
   useEffect(() => {
     // 👇️ scroll to bottom every time messages change
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []); // TODO: every time we get a new message, we should run this effect
+  }, [id]); // TODO: every time we get a new message, we should run this effect
 
   const getChatData = async () => {
     const { ok, body } = await customFetch({
@@ -48,6 +91,11 @@ const ChatBox = ({ id }: ChatBoxProps) => {
       setChatImage(getImageFromChat(body, username));
       setMessages(body.messages);
       setSelectedChatData(body);
+
+      const receivedMessages = body.messages as Message[];
+      const sorted = receivedMessages.sort((a, b) => b.timestamp - a.timestamp);
+      // const reversed = sorted.reverse();
+      setGroupedMessages(groupMessagesBySender(sorted));
     } else {
       toast({
         title: 'An error occurred while fetching chat data.',
@@ -58,17 +106,47 @@ const ChatBox = ({ id }: ChatBoxProps) => {
     }
   };
 
+  const handleSendMessage = (e: any) => {
+    e.preventDefault();
+    sendJsonMessage({
+      senderUsername: username,
+      content: messageText,
+      chatID: id,
+    });
+    setMessageText('');
+  };
+
+  // useEffect(() => {
+  //   // TODO: fix the sorting!
+  //   // console.log({ messages });
+  //   const sorted = messages.sort((a, b) => b.timestamp - a.timestamp);
+  //   // const reversed = sorted.reverse();
+  //   setGroupedMessages(groupMessagesBySender(sorted));
+  // }, [messages]);
+
   useEffect(() => {
+    if (lastJsonMessage?.chatID === id) {
+      setMessages([...messages, lastJsonMessage]);
+      setGroupedMessages(groupMessagesBySender([...messages, lastJsonMessage]));
+    }
+  }, [lastJsonMessage]);
+
+  useEffect(() => {
+    const tempChats = chats;
+    if (tempChats) {
+      const foundIndex = tempChats.findIndex((chat) => chat.id === id);
+      if (foundIndex && foundIndex !== -1) {
+        const foundChat = tempChats[foundIndex];
+        foundChat.unreadMessageCount = 0;
+        tempChats[foundIndex] = foundChat;
+        setChats(tempChats);
+      }
+    }
     getChatData();
   }, [id]);
 
   return (
-    <Stack
-      px={4}
-      height='100vh'
-      justifyContent='space-between'
-      overflow='scroll'
-    >
+    <Stack px={4} height='100vh' justifyContent='space-between'>
       <Box
         position='sticky'
         top={0}
@@ -81,39 +159,22 @@ const ChatBox = ({ id }: ChatBoxProps) => {
               {chatName}
             </Heading>
           </Flex>
-          <ChatSettings />
+          <ChatSettings handleLeaveChat={handleDeleteChat} />
         </Flex>
         <Divider />
       </Box>
       <Box>
-        {messages?.map((message) => (
-          <MessageGroup
-            from={{
-              name: `${message.sender.firstname} ${message.sender.lastname}`,
-              photoUrl: message.sender.image,
-            }}
-            isFromMe={message.sender.username === username}
-            messages={[message.content]}
-          />
-        ))}
-        {/* <MessageGroup
-          isFromMe
-          from={{
-            name: 'Dan Abrahmov',
-            photoUrl: 'https://bit.ly/dan-abramov',
-          }}
-          messages={['hello', 'how are you?']}
-        />
-        <MessageGroup
-          isFromMe={false}
-          from={{
-            name: 'Kent Dodds',
-            photoUrl: 'https://bit.ly/kent-c-dodds',
-          }}
-          messages={['hi', 'Im fine how are you?', 'blah blah']}
-        /> */}
+        <Box overflow='scroll' height={590} overflowY='auto'>
+          {groupedMessages.map((groupedMessage) => (
+            <MessageGroup
+              from={groupedMessage.from}
+              isFromMe={groupedMessage.from.username === username}
+              messages={groupedMessage.messages}
+            />
+          ))}
+          <div ref={bottomRef} />
+        </Box>
 
-        <div ref={bottomRef} />
         {/* footer */}
         <Flex
           py={4}
@@ -127,17 +188,24 @@ const ChatBox = ({ id }: ChatBoxProps) => {
             aria-label='attachment-icon'
             variant='ghost'
           />
-          <InputGroup variant='filled'>
-            <Input placeholder='Type a message...' />
-            <InputRightElement>
-              <IconButton
-                icon={<ArrowForwardIcon />}
-                variant='ghost'
-                aria-label='send-icon'
-                color='ButtonText'
+          <form onSubmit={handleSendMessage}>
+            <InputGroup variant='filled'>
+              <Input
+                placeholder='Type a message...'
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
               />
-            </InputRightElement>
-          </InputGroup>
+              <InputRightElement>
+                <IconButton
+                  icon={<ArrowForwardIcon />}
+                  variant='ghost'
+                  aria-label='send-icon'
+                  color='ButtonText'
+                  type='submit'
+                />
+              </InputRightElement>
+            </InputGroup>
+          </form>
         </Flex>
       </Box>
     </Stack>

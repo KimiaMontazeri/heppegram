@@ -2,11 +2,11 @@ import { create } from 'zustand';
 import { User } from './user-store';
 
 export type Message = {
-  id: string;
-  sender: User;
+  id?: string;
+  sender: User | null;
   content: string;
   timestamp: number;
-  // TODO: chatID
+  chatID?: number;
 };
 
 export type Chat = {
@@ -14,6 +14,7 @@ export type Chat = {
   people?: User[];
   lastMessage?: Message;
   messages?: Message[];
+  unreadMessageCount?: number;
 };
 
 export type Chats = Chat[];

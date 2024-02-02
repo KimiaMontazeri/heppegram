@@ -10,17 +10,30 @@ import { useEffect, useState } from 'react';
 import useAppStore from '../../store/app-store';
 import useUserStore, { User } from '../../store/user-store';
 import { getUserFromChat } from '../../utils/chat';
+import useCustomWebSocket from '../../hooks/user-custom-web-socket';
+import { ReadyState } from 'react-use-websocket';
 
 function Home() {
   const toast = useToast();
   const [chatList, setChatList] = useState<Chats | null>(null);
+  const [chatDetailsData, setChatDetailsData] = useState<User | null>(null);
   const setChats = useChatsStore((state) => state.setChats);
   const chats = useChatsStore((state) => state.chats);
   const username = useUserStore((state) => state.user?.username);
   const selectedChat = useAppStore((state) => state.selectedChat);
   const selectedChatData = useAppStore((state) => state.selectedChatData);
+  const user = useUserStore((state) => state.user);
 
-  const [chatDetailsData, setChatDetailsData] = useState<User | null>(null);
+  const { readyState, lastJsonMessage } = useCustomWebSocket();
+
+  if (readyState === ReadyState.CLOSED) {
+    toast({
+      title: 'An error occurred',
+      status: 'error',
+      duration: 2000,
+      isClosable: true,
+    });
+  }
 
   const getChats = async () => {
     const { ok, body } = await customFetch({
@@ -55,6 +68,41 @@ function Home() {
   }, [selectedChatData]);
 
   useEffect(() => {
+    const chatsTemp = chats;
+    if (lastJsonMessage) {
+      console.log({ lastJsonMessage });
+      const { sender, content, timestamp, chatID } = lastJsonMessage;
+      if (chatID !== selectedChat) {
+        const foundChatIndex = chatsTemp?.findIndex(
+          (chat) => chat.id === chatID,
+        );
+        if (foundChatIndex && foundChatIndex !== -1 && chatsTemp) {
+          const foundChat = chatsTemp[foundChatIndex];
+          foundChat.unreadMessageCount =
+            (foundChat.unreadMessageCount || 0) + 1;
+          chatsTemp[foundChatIndex] = foundChat;
+          console.log({ foundChat });
+          setChats(chatsTemp);
+          setChatList(chatsTemp);
+        } else if (user) {
+          chatsTemp?.push({
+            id: chatID,
+            people: [user, sender as User],
+            lastMessage: {
+              content,
+              timestamp,
+              sender: {},
+            },
+            unreadMessageCount: 1,
+          });
+          setChats(chatsTemp);
+          setChatList(chatsTemp);
+        }
+      }
+    }
+  }, [lastJsonMessage]);
+
+  useEffect(() => {
     getChats();
   }, []);
 
@@ -76,7 +124,7 @@ function Home() {
         ) : chatList && chatList.length !== 0 ? (
           <ChatList selectedChatId={selectedChat} chats={chatList} />
         ) : (
-          <Center p={4}>
+          <Center p={4} color='purple.500'>
             <Text>You have no chats!</Text>
           </Center>
         )}
@@ -87,7 +135,7 @@ function Home() {
           <ChatBox id={selectedChat} />
         ) : (
           <Center height='100vh'>
-            <Text fontSize='lg' color='yellow.500'>
+            <Text fontSize='lg' color='purple.500'>
               No chat selected!
             </Text>
           </Center>

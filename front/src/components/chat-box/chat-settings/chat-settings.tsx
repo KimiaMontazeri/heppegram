@@ -9,7 +9,10 @@ import {
 } from '@chakra-ui/react';
 import { ChatSettingsProps } from './chat-settings.types';
 
-const ChatSettings = ({ isAdmin = false }: ChatSettingsProps) => {
+const ChatSettings = ({
+  isAdmin = false,
+  handleLeaveChat,
+}: ChatSettingsProps) => {
   return (
     <Menu>
       <MenuButton>
@@ -17,7 +20,9 @@ const ChatSettings = ({ isAdmin = false }: ChatSettingsProps) => {
       </MenuButton>
       <Portal>
         <MenuList>
-          <MenuItem color='red.500'>Leave</MenuItem>
+          <MenuItem color='red.500' onClick={handleLeaveChat}>
+            Leave
+          </MenuItem>
           {isAdmin && <MenuItem color='red.500'>Delete</MenuItem>}
         </MenuList>
       </Portal>

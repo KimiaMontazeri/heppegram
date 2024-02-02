@@ -26,8 +26,10 @@ import useUserStore from '../../store/user-store';
 import { timestampToHHMM } from '../../utils/time';
 import useAppStore from '../../store/app-store';
 import { getNameFromChat } from '../../utils/chat';
+import type { Chat } from '../../store/chats-store';
 
-const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
+const ChatList = ({ selectedChatId, chats }: ChatListProps) => {
+  console.log('chat-list');
   const username = useUserStore((state) => state.user?.username);
   const setSelectedChat = useAppStore((state) => state.setSelectedChat);
 
@@ -41,11 +43,19 @@ const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
   }, [chats]);
 
   const handleSearchChats = (searchValue: string) => {
-    const filteredChatList = chats.filter((chat) => {
+    const filteredChatList = chats?.filter((chat) => {
       const name = getNameFromChat(chat, username);
       return name.startsWith(searchValue);
     });
-    setChatList(filteredChatList);
+    setChatList(filteredChatList || null);
+  };
+
+  const getUnreadMessageCount = (chat: Chat) => {
+    const foundChat = chats?.find((item) => item.id === chat.id);
+    if (foundChat) {
+      return foundChat.unreadMessageCount;
+    }
+    return 0;
   };
 
   return (
@@ -111,7 +121,7 @@ const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
         </InputGroup>
       </Stack>
 
-      {chatList.map((chat, index) => (
+      {chatList?.map((chat, index) => (
         <Box key={index} onClick={() => setSelectedChat(chat.id || null)}>
           <ChatItem
             selected={selectedChatId === chat.id}
@@ -123,6 +133,7 @@ const ChatList = ({ chats, selectedChatId }: ChatListProps) => {
                 ? timestampToHHMM(chat.lastMessage?.timestamp)
                 : undefined
             }
+            unreadMessageCount={getUnreadMessageCount(chat)}
           />
         </Box>
       ))}

@@ -40,7 +40,7 @@ func main() {
 	}(c)
 
 	e.Use(middleware.Logger())
-	e.Use(middleware.CSRF())
+	// e.Use(middleware.CSRF())
 	e.Use(middleware.CORS())
 	e.Use(echoprometheus.NewMiddleware("heppegram"))
 
@@ -87,8 +87,7 @@ func main() {
 
 	// WS Handlers
 	ws := e.Group("/ws")
-	ws.Use(customMiddleware.JWTAuthentication)
-	ws.GET("", wsHandler.HandleWS)
+	ws.GET("/:token", wsHandler.HandleWS)
 
 	log.Println("Starting Echo server on port 8080...")
 	e.Logger.Fatal(e.Start(":8080"))

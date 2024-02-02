@@ -9,12 +9,13 @@ import {
 } from '@chakra-ui/react';
 import { TextMessageProps } from './text-message.types';
 import './text-message.css';
+import { timestampToHHMM } from '../../../utils/time';
 
 const TextMessage = ({
   children,
   direction,
   showBubble,
-  timestamp = 12,
+  timestamp,
 }: TextMessageProps) => {
   const { colorMode } = useColorMode();
   const bubbleColor = colorMode === 'light' ? '#edf2f7' : '#2d3748';
@@ -48,7 +49,7 @@ const TextMessage = ({
           >
             {children}
             <Text fontSize='xs' color={grayTextColor}>
-              {timestamp}
+              {timestamp && timestampToHHMM(timestamp)}
             </Text>
           </Box>
           <BubbleIcon
@@ -84,7 +85,7 @@ const TextMessage = ({
         >
           {children}
           <Text fontSize='xs' color={grayTextColor}>
-            {timestamp}
+            {timestamp && timestampToHHMM(timestamp)}
           </Text>
         </Box>
       </Flex>

@@ -3,11 +3,13 @@ package handlers
 import (
 	"github.com/KimiaMontazeri/heppegram/back/models"
 	"github.com/KimiaMontazeri/heppegram/back/repository"
+	"github.com/KimiaMontazeri/heppegram/back/utils"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
 	"sync"
+	"time"
 )
 
 var upgrader = websocket.Upgrader{
@@ -63,16 +65,18 @@ func (manager *WSManager) run() {
 	for {
 		select {
 		case userConn := <-manager.register:
+			log.Println("registering connection to user: ", userConn.UserID)
 			manager.clientsMu.Lock()
 			manager.clients[userConn.UserID] = &WSConn{Conn: userConn.Conn}
 			manager.clientsMu.Unlock()
 		case userID := <-manager.unregister:
+			log.Println("unregistering connection to user: ", userID)
 			manager.clientsMu.Lock()
 			if conn, ok := manager.clients[userID]; ok {
 				delete(manager.clients, userID)
 				err := conn.Conn.Close()
 				if err != nil {
-					return
+					log.Println("error closing connection:", err)
 				}
 			}
 			manager.clientsMu.Unlock()
@@ -91,34 +95,39 @@ func (h *WSHandler) SendMessageToChatMembers(chatID uint, senderID uint, message
 	defer h.WSManager.clientsMu.RUnlock()
 
 	for _, userID := range userIDs {
-		if userID != senderID {
-			if wsConn, ok := h.WSManager.clients[userID]; ok {
-				wsConn.mu.Lock()
-				err := wsConn.Conn.WriteJSON(messageResponse)
-				wsConn.mu.Unlock()
-
-				if err != nil {
-					log.Printf("Error sending message to user %d: %v", userID, err)
-				}
+		log.Println("sending message to user if present: ", userID)
+		if wsConn, ok := h.WSManager.clients[userID]; ok {
+			wsConn.mu.Lock()
+			err := wsConn.Conn.WriteJSON(messageResponse)
+			wsConn.mu.Unlock()
+			log.Println("message sent to user: ", userID)
+			if err != nil {
+				log.Printf("Error sending message to user %d: %v", userID, err)
 			}
 		}
 	}
 }
 
 func (h *WSHandler) HandleWS(c echo.Context) error {
+	log.Println("new ws request")
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		log.Println("Upgrade error:", err)
 		return err
 	}
 	defer func(ws *websocket.Conn) {
+		log.Println("closing primary connection")
 		err := ws.Close()
 		if err != nil {
 			log.Printf("Failed to close the WebSocket connection: %v\n", err)
 		}
 	}(ws)
 
-	authUsername := c.Get("username").(string)
+	token := c.Param("token")
+	authUsername, err := utils.ParseJWT(token)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, "invalid or expired JWT")
+	}
 	if authUsername == "" {
 		return echo.NewHTTPError(http.StatusUnauthorized, "User not authenticated")
 	}
@@ -134,6 +143,10 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 
 	h.WSManager.register <- &UserConn{UserID: user.ID, Conn: ws}
 	defer func() { h.WSManager.unregister <- user.ID }()
+
+	time.Sleep(200 * time.Millisecond)
+
+	log.Println("registered as user: ", user.Username)
 
 	for {
 		var msgRequest MessageRequest
