@@ -29,10 +29,11 @@ import useCustomWebSocket from '../../hooks/user-custom-web-socket';
 const ChatBox = ({ id }: ChatBoxProps) => {
   const toast = useToast();
   const bottomRef = useRef<HTMLDivElement>(null);
-  const setSelectedChatData = useAppStore((state) => state.setSelectedChatData);
   // for updating chat's unread message count
   const chats = useChatsStore((state) => state.chats);
   const setChats = useChatsStore((state) => state.setChats);
+  const setSelectedChat = useAppStore((state) => state.setSelectedChat);
+  const setSelectedChatData = useAppStore((state) => state.setSelectedChatData);
 
   const username = useUserStore((state) => state.user?.username);
   const [chatName, setChatName] = useState('');
@@ -41,6 +42,38 @@ const ChatBox = ({ id }: ChatBoxProps) => {
   const [groupedMessages, setGroupedMessages] = useState<GroupedMessage[]>([]);
   const [messageText, setMessageText] = useState('');
   const { sendJsonMessage, lastJsonMessage } = useCustomWebSocket();
+
+  const deleteChat = async () => {
+    const { ok } = await customFetch({
+      url: `/api/chats/${id}`,
+      method: 'DELETE',
+    });
+
+    if (ok) {
+      toast({
+        title: 'Chat deleted successfully.',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+      // update store
+      const filteredChats = chats?.filter((chat) => chat.id !== id);
+      setChats(filteredChats || null);
+      setSelectedChat(null);
+      setSelectedChatData(null);
+    } else {
+      toast({
+        title: 'An error occurred while deleting the chat.',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleDeleteChat = () => {
+    deleteChat();
+  };
 
   useEffect(() => {
     // 👇️ scroll to bottom every time messages change
@@ -117,7 +150,7 @@ const ChatBox = ({ id }: ChatBoxProps) => {
               {chatName}
             </Heading>
           </Flex>
-          <ChatSettings />
+          <ChatSettings handleLeaveChat={handleDeleteChat} />
         </Flex>
         <Divider />
       </Box>

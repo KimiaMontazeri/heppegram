@@ -4,17 +4,12 @@ import { MessageGroupProps } from './message-group.types';
 import { DeleteIcon } from '@chakra-ui/icons';
 import { customFetch } from '../../../services/fetch';
 import useAppStore from '../../../store/app-store';
-import useChatsStore from '../../../store/chats-store';
 import { useState } from 'react';
 
 const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
-  // const [deleteMessageModalVisibility, setDeleteMessageModalVisibility] =
-  //   useState(false);
   const selectedChat = useAppStore((state) => state.selectedChat);
   const toast = useToast();
   const [currentMessages, setCurrentMessages] = useState(messages);
-  const chats = useChatsStore((state) => state.chats);
-  const setChats = useChatsStore((state) => state.setChats);
 
   const handleDeleteMessage = async (id: string | undefined) => {
     const { ok } = await customFetch({
