@@ -21,7 +21,7 @@ export const groupMessagesBySender = (
 
       const lastGroup = groupedMessages[groupedMessages.length - 1];
 
-      if (!lastGroup || lastGroup.from.username !== sender?.id) {
+      if (!lastGroup || lastGroup.from.username !== sender?.username) {
         // start a new group
         groupedMessages.push({
           from: {
