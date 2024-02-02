@@ -29,7 +29,7 @@ type UserResponseDTO struct {
 type UserRegisterDTO struct {
 	Firstname string `json:"firstname" validate:"required,alpha"`
 	Lastname  string `json:"lastname" validate:"required,alpha"`
-	Phone     string `json:"phone" validate:"required,e164"`
+	Phone     string `json:"phone" validate:"required,numeric,min=10,max=15"`
 	Username  string `json:"username" validate:"required,alphanum,min=3,max=25"`
 	Password  string `json:"password" validate:"required,min=8"`
 	Bio       string `json:"bio" validate:"max=100"`
