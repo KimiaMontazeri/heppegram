@@ -27,11 +27,12 @@ type UserResponseDTO struct {
 }
 
 type UserRegisterDTO struct {
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
-	Phone     string `json:"phone"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
+	Firstname string `json:"firstname" validate:"required,alpha"`
+	Lastname  string `json:"lastname" validate:"required,alpha"`
+	Phone     string `json:"phone" validate:"required,e164"`
+	Username  string `json:"username" validate:"required,alphanum,min=3,max=25"`
+	Password  string `json:"password" validate:"required,min=8"`
+	Bio       string `json:"bio" validate:"max=100"`
 }
 
 type UserUpdateDTO struct {
@@ -51,6 +52,10 @@ type UserLoginDTO struct {
 func (h *UserHandler) Register(c echo.Context) error {
 	userRegisterDTO := new(UserRegisterDTO)
 	if err := c.Bind(userRegisterDTO); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	if err := c.Validate(userRegisterDTO); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 

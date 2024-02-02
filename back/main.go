@@ -5,6 +5,7 @@ import (
 	"github.com/KimiaMontazeri/heppegram/back/handlers"
 	customMiddleware "github.com/KimiaMontazeri/heppegram/back/middleware"
 	"github.com/KimiaMontazeri/heppegram/back/repository/gorm"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo-contrib/jaegertracing"
 	"github.com/labstack/echo/v4"
@@ -15,10 +16,20 @@ import (
 	"time"
 )
 
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
+
 func main() {
-	time.Sleep(5 * time.Second)
+	time.Sleep(3 * time.Second)
 	db.Init()
 	e := echo.New()
+
+	e.Validator = &CustomValidator{validator: validator.New()}
 
 	c := jaegertracing.New(e, nil)
 	defer func(c io.Closer) {
@@ -58,6 +69,7 @@ func main() {
 	user.POST("/register", userHandler.Register)
 	user.POST("/login", userHandler.Login)
 
+	// Users Handlers
 	users.Use(customMiddleware.JWTAuthentication)
 	users.GET("", userHandler.SearchUsers)
 	users.GET("/:username", userHandler.GetUser)
@@ -73,6 +85,7 @@ func main() {
 	chat.DELETE("/:chat_id", chatHandler.DeleteChat)
 	chat.DELETE("/:chat_id/messages/:message_id", chatHandler.DeleteMessage)
 
+	// WS Handlers
 	ws := e.Group("/ws")
 	ws.Use(customMiddleware.JWTAuthentication)
 	ws.GET("", wsHandler.HandleWS)
