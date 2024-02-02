@@ -113,9 +113,13 @@ const ChatBox = ({ id }: ChatBoxProps) => {
 
   useEffect(() => {
     // TODO: fix the sorting!
-    const sorted = messages.sort((a, b) => b.timestamp - a.timestamp);
-    // const reversed = sorted.reverse();
-    setGroupedMessages(groupMessagesBySender(sorted));
+    console.log({ messages });
+    const sorted = messages.sort((a, b) => {
+      console.log(a.timestamp, b.timestamp);
+      return b.timestamp - a.timestamp;
+    });
+    const reversed = sorted.reverse();
+    setGroupedMessages(groupMessagesBySender(reversed));
   }, [messages]);
 
   useEffect(() => {
@@ -123,7 +127,6 @@ const ChatBox = ({ id }: ChatBoxProps) => {
   }, [lastJsonMessage]);
 
   useEffect(() => {
-    getChatData();
     const tempChats = chats;
     if (tempChats) {
       const foundIndex = tempChats.findIndex((chat) => chat.id === id);
@@ -134,6 +137,7 @@ const ChatBox = ({ id }: ChatBoxProps) => {
         setChats(tempChats);
       }
     }
+    getChatData();
   }, [id]);
 
   return (
