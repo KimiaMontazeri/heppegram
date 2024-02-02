@@ -29,7 +29,7 @@ func main() {
 	}(c)
 
 	e.Use(middleware.Logger())
-	e.Use(middleware.CSRF())
+	// e.Use(middleware.CSRF())
 	e.Use(middleware.CORS())
 	e.Use(echoprometheus.NewMiddleware("heppegram"))
 
@@ -74,8 +74,7 @@ func main() {
 	chat.DELETE("/:chat_id/messages/:message_id", chatHandler.DeleteMessage)
 
 	ws := e.Group("/ws")
-	ws.Use(customMiddleware.JWTAuthentication)
-	ws.GET("", wsHandler.HandleWS)
+	ws.GET("/:token", wsHandler.HandleWS)
 
 	log.Println("Starting Echo server on port 8080...")
 	e.Logger.Fatal(e.Start(":8080"))

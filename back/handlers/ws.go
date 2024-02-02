@@ -3,11 +3,13 @@ package handlers
 import (
 	"github.com/KimiaMontazeri/heppegram/back/models"
 	"github.com/KimiaMontazeri/heppegram/back/repository"
+	"github.com/KimiaMontazeri/heppegram/back/utils"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
 	"sync"
+	"time"
 )
 
 var upgrader = websocket.Upgrader{
@@ -93,21 +95,21 @@ func (h *WSHandler) SendMessageToChatMembers(chatID uint, senderID uint, message
 	defer h.WSManager.clientsMu.RUnlock()
 
 	for _, userID := range userIDs {
-		if userID != senderID {
-			if wsConn, ok := h.WSManager.clients[userID]; ok {
-				wsConn.mu.Lock()
-				err := wsConn.Conn.WriteJSON(messageResponse)
-				wsConn.mu.Unlock()
-
-				if err != nil {
-					log.Printf("Error sending message to user %d: %v", userID, err)
-				}
+		log.Println("sending message to user if present: ", userID)
+		if wsConn, ok := h.WSManager.clients[userID]; ok {
+			wsConn.mu.Lock()
+			err := wsConn.Conn.WriteJSON(messageResponse)
+			wsConn.mu.Unlock()
+			log.Println("message sent to user: ", userID)
+			if err != nil {
+				log.Printf("Error sending message to user %d: %v", userID, err)
 			}
 		}
 	}
 }
 
 func (h *WSHandler) HandleWS(c echo.Context) error {
+	log.Println("new ws request")
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		log.Println("Upgrade error:", err)
@@ -121,7 +123,11 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 		}
 	}(ws)
 
-	authUsername := c.Get("username").(string)
+	token := c.Param("token")
+	authUsername, err := utils.ParseJWT(token)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, "invalid or expired JWT")
+	}
 	if authUsername == "" {
 		return echo.NewHTTPError(http.StatusUnauthorized, "User not authenticated")
 	}
@@ -137,6 +143,8 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 
 	h.WSManager.register <- &UserConn{UserID: user.ID, Conn: ws}
 	defer func() { h.WSManager.unregister <- user.ID }()
+
+	time.Sleep(200 * time.Millisecond)
 
 	log.Println("registered as user: ", user.Username)
 
