@@ -10,7 +10,6 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
   const selectedChat = useAppStore((state) => state.selectedChat);
   const toast = useToast();
   const [currentMessages, setCurrentMessages] = useState(messages);
-  console.log('message-group', { messages });
 
   const handleDeleteMessage = async (id: string | undefined) => {
     const { ok } = await customFetch({
@@ -54,7 +53,7 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
           <Flex gap={2} align='flex-end'>
             <Stack pt={1} alignItems='flex-end' pb={1}>
               {currentMessages.map((message, index) => (
-                <Flex align='center'>
+                <Flex align='center' key={index}>
                   <IconButton
                     icon={<DeleteIcon />}
                     colorScheme='red'

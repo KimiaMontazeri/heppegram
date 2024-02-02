@@ -27,20 +27,24 @@ import { timestampToHHMM } from '../../utils/time';
 import useAppStore from '../../store/app-store';
 import { getNameFromChat } from '../../utils/chat';
 import type { Chat } from '../../store/chats-store';
+// import useChatsStore from '../../store/chats-store';
 
 const ChatList = ({ selectedChatId, chats }: ChatListProps) => {
-  console.log('chat-list');
   const username = useUserStore((state) => state.user?.username);
   const setSelectedChat = useAppStore((state) => state.setSelectedChat);
 
   const [searchContactModalOpen, setSearchContactModalOpen] = useState(false);
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   const [createChatModalOpen, setCreateChatModalOpen] = useState(false);
+  // const chats = useChatsStore((state) => state.chats);
   const [chatList, setChatList] = useState(chats);
 
   useEffect(() => {
     setChatList(chats);
+    console.log('chats changed in chat list');
   }, [chats]);
+
+  console.log('chat list');
 
   const handleSearchChats = (searchValue: string) => {
     const filteredChatList = chats?.filter((chat) => {

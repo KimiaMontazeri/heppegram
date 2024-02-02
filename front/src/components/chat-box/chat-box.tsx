@@ -43,6 +43,13 @@ const ChatBox = ({ id }: ChatBoxProps) => {
   const [messageText, setMessageText] = useState('');
   const { sendJsonMessage, lastJsonMessage } = useCustomWebSocket();
 
+  useEffect(() => {
+    const currentChat = chats?.find((chat) => chat.id === id);
+    if (currentChat) {
+      setMessages(currentChat.messages || []);
+    }
+  }, [chats]);
+
   const deleteChat = async () => {
     const { ok } = await customFetch({
       url: `/api/chats/${id}`,
@@ -94,8 +101,8 @@ const ChatBox = ({ id }: ChatBoxProps) => {
 
       const receivedMessages = body.messages as Message[];
       const sorted = receivedMessages.sort((a, b) => b.timestamp - a.timestamp);
-      // const reversed = sorted.reverse();
-      setGroupedMessages(groupMessagesBySender(sorted));
+      const reversed = sorted.reverse();
+      setGroupedMessages(groupMessagesBySender(reversed));
     } else {
       toast({
         title: 'An error occurred while fetching chat data.',
@@ -165,11 +172,12 @@ const ChatBox = ({ id }: ChatBoxProps) => {
       </Box>
       <Box>
         <Box overflow='scroll' height={590} overflowY='auto'>
-          {groupedMessages.map((groupedMessage) => (
+          {groupedMessages.map((groupedMessage, index) => (
             <MessageGroup
               from={groupedMessage.from}
               isFromMe={groupedMessage.from.username === username}
               messages={groupedMessage.messages}
+              key={index}
             />
           ))}
           <div ref={bottomRef} />

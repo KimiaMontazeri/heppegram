@@ -69,6 +69,7 @@ function Home() {
 
   useEffect(() => {
     const chatsTemp = chats;
+    console.log({ lastJsonMessage });
     if (lastJsonMessage) {
       console.log({ lastJsonMessage });
       const { sender, content, timestamp, chatID } = lastJsonMessage;
@@ -80,8 +81,10 @@ function Home() {
           const foundChat = chatsTemp[foundChatIndex];
           foundChat.unreadMessageCount =
             (foundChat.unreadMessageCount || 0) + 1;
+          foundChat.lastMessage = content;
           chatsTemp[foundChatIndex] = foundChat;
           console.log({ foundChat });
+          console.log({ chatsTemp });
           setChats(chatsTemp);
           setChatList(chatsTemp);
         } else if (user) {
