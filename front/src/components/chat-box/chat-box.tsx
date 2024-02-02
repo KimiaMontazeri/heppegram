@@ -21,7 +21,7 @@ import { customFetch } from '../../services/fetch';
 import { getImageFromChat, getNameFromChat } from '../../utils/chat';
 import useUserStore from '../../store/user-store';
 import useAppStore from '../../store/app-store';
-import { Message } from '../../store/chats-store';
+import useChatsStore, { Message } from '../../store/chats-store';
 import { GroupedMessage } from './message-group/message-group.types';
 import { groupMessagesBySender } from '../../utils/message';
 import useCustomWebSocket from '../../hooks/user-custom-web-socket';
@@ -30,6 +30,10 @@ const ChatBox = ({ id }: ChatBoxProps) => {
   const toast = useToast();
   const bottomRef = useRef<HTMLDivElement>(null);
   const setSelectedChatData = useAppStore((state) => state.setSelectedChatData);
+  // for updating chat's unread message count
+  const chats = useChatsStore((state) => state.chats);
+  const setChats = useChatsStore((state) => state.setChats);
+
   const username = useUserStore((state) => state.user?.username);
   const [chatName, setChatName] = useState('');
   const [chatImage, setChatImage] = useState('');
@@ -87,6 +91,16 @@ const ChatBox = ({ id }: ChatBoxProps) => {
 
   useEffect(() => {
     getChatData();
+    const tempChats = chats;
+    if (tempChats) {
+      const foundIndex = tempChats.findIndex((chat) => chat.id === id);
+      if (foundIndex && foundIndex !== -1) {
+        const foundChat = tempChats[foundIndex];
+        foundChat.unreadMessageCount = 0;
+        tempChats[foundIndex] = foundChat;
+        setChats(tempChats);
+      }
+    }
   }, [id]);
 
   return (

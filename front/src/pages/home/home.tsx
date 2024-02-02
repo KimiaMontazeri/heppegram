@@ -71,20 +71,21 @@ function Home() {
     const chatsTemp = chats;
     if (lastJsonMessage) {
       console.log({ lastJsonMessage });
-      const { sender, content, timestamp, chadID } = lastJsonMessage;
-      if (chadID !== selectedChat) {
+      const { sender, content, timestamp, chatID } = lastJsonMessage;
+      if (chatID !== selectedChat) {
         const foundChatIndex = chatsTemp?.findIndex(
-          (chat) => chat.id === chadID,
+          (chat) => chat.id === chatID,
         );
         if (foundChatIndex && foundChatIndex !== -1 && chatsTemp) {
           const foundChat = chatsTemp[foundChatIndex];
           foundChat.unreadMessageCount =
             (foundChat.unreadMessageCount || 0) + 1;
           chatsTemp[foundChatIndex] = foundChat;
+          console.log({ foundChat });
           setChats(chatsTemp);
         } else if (user) {
           chatsTemp?.push({
-            id: chadID,
+            id: chatID,
             people: [user, sender as User],
             lastMessage: {
               content,
@@ -93,6 +94,7 @@ function Home() {
             },
             unreadMessageCount: 1,
           });
+          setChats(chatsTemp);
         }
       }
     }
