@@ -147,6 +147,10 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 			break
 		}
 
+		if err := c.Validate(msgRequest); err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
 		log.Printf("Received message from user %d in chat %d: %s\n", user.ID, msgRequest.ChatID, msgRequest.Content)
 
 		newMessage := &models.Message{

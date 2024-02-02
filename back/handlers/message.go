@@ -30,5 +30,5 @@ type MessageResponse struct {
 type MessageRequest struct {
 	ChatID         uint   `json:"chatID"`
 	SenderUsername string `json:"senderUsername"`
-	Content        string `json:"content"`
+	Content        string `json:"content" validate:"max=300"`
 }
