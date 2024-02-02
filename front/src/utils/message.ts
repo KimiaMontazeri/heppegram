@@ -3,7 +3,7 @@ import type { Message } from '../store/chats-store';
 import type { GroupedMessage } from '../components/chat-box/message-group/message-group.types';
 
 export const isMessageFromMe = (message: Message) => {
-  return message.sender.username === getUsername();
+  return message.sender?.username === getUsername();
 };
 
 /**
@@ -16,22 +16,25 @@ export const groupMessagesBySender = (
   const groupedMessages: GroupedMessage[] = [];
 
   for (const message of messages) {
-    const { sender } = message;
-    const lastGroup = groupedMessages[groupedMessages.length - 1];
+    if (message) {
+      const { sender } = message;
 
-    if (!lastGroup || lastGroup.from.username !== sender.id) {
-      // start a new group
-      groupedMessages.push({
-        from: {
-          username: sender.username,
-          name: `${sender.firstname} ${sender.lastname}`,
-          photoUrl: sender.image,
-        },
-        messages: [message],
-      });
-    } else {
-      // add message to the current group
-      lastGroup.messages.push(message);
+      const lastGroup = groupedMessages[groupedMessages.length - 1];
+
+      if (!lastGroup || lastGroup.from.username !== sender?.id) {
+        // start a new group
+        groupedMessages.push({
+          from: {
+            username: sender?.username,
+            name: `${sender?.firstname} ${sender?.lastname}`,
+            photoUrl: sender?.image,
+          },
+          messages: [message],
+        });
+      } else {
+        // add message to the current group
+        lastGroup.messages.push(message);
+      }
     }
   }
 

@@ -24,6 +24,7 @@ import useAppStore from '../../store/app-store';
 import { Message } from '../../store/chats-store';
 import { GroupedMessage } from './message-group/message-group.types';
 import { groupMessagesBySender } from '../../utils/message';
+import useCustomWebSocket from '../../hooks/user-custom-web-socket';
 
 const ChatBox = ({ id }: ChatBoxProps) => {
   const toast = useToast();
@@ -34,6 +35,8 @@ const ChatBox = ({ id }: ChatBoxProps) => {
   const [chatImage, setChatImage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [groupedMessages, setGroupedMessages] = useState<GroupedMessage[]>([]);
+  const [messageText, setMessageText] = useState('');
+  const { sendJsonMessage, lastJsonMessage } = useCustomWebSocket();
 
   useEffect(() => {
     // 👇️ scroll to bottom every time messages change
@@ -61,21 +64,33 @@ const ChatBox = ({ id }: ChatBoxProps) => {
     }
   };
 
+  const handleSendMessage = (e: any) => {
+    e.preventDefault();
+    sendJsonMessage({
+      senderUsername: username,
+      content: messageText,
+      chatID: id,
+    });
+    setMessageText('');
+  };
+
   useEffect(() => {
-    setGroupedMessages(groupMessagesBySender(messages));
+    // TODO: fix the sorting!
+    const sorted = messages.sort((a, b) => b.timestamp - a.timestamp);
+    // const reversed = sorted.reverse();
+    setGroupedMessages(groupMessagesBySender(sorted));
   }, [messages]);
+
+  useEffect(() => {
+    setMessages([...messages, lastJsonMessage]);
+  }, [lastJsonMessage]);
 
   useEffect(() => {
     getChatData();
   }, [id]);
 
   return (
-    <Stack
-      px={4}
-      height='100vh'
-      justifyContent='space-between'
-      overflow='scroll'
-    >
+    <Stack px={4} height='100vh' justifyContent='space-between'>
       <Box
         position='sticky'
         top={0}
@@ -93,15 +108,17 @@ const ChatBox = ({ id }: ChatBoxProps) => {
         <Divider />
       </Box>
       <Box>
-        {groupedMessages.map((groupedMessage) => (
-          <MessageGroup
-            from={groupedMessage.from}
-            isFromMe={groupedMessage.from.username === username}
-            messages={groupedMessage.messages}
-          />
-        ))}
+        <Box overflow='scroll' height={590} overflowY='auto'>
+          {groupedMessages.map((groupedMessage) => (
+            <MessageGroup
+              from={groupedMessage.from}
+              isFromMe={groupedMessage.from.username === username}
+              messages={groupedMessage.messages}
+            />
+          ))}
+          <div ref={bottomRef} />
+        </Box>
 
-        <div ref={bottomRef} />
         {/* footer */}
         <Flex
           py={4}
@@ -115,17 +132,24 @@ const ChatBox = ({ id }: ChatBoxProps) => {
             aria-label='attachment-icon'
             variant='ghost'
           />
-          <InputGroup variant='filled'>
-            <Input placeholder='Type a message...' />
-            <InputRightElement>
-              <IconButton
-                icon={<ArrowForwardIcon />}
-                variant='ghost'
-                aria-label='send-icon'
-                color='ButtonText'
+          <form onSubmit={handleSendMessage}>
+            <InputGroup variant='filled'>
+              <Input
+                placeholder='Type a message...'
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
               />
-            </InputRightElement>
-          </InputGroup>
+              <InputRightElement>
+                <IconButton
+                  icon={<ArrowForwardIcon />}
+                  variant='ghost'
+                  aria-label='send-icon'
+                  color='ButtonText'
+                  type='submit'
+                />
+              </InputRightElement>
+            </InputGroup>
+          </form>
         </Flex>
       </Box>
     </Stack>

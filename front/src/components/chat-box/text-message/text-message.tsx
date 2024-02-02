@@ -49,7 +49,7 @@ const TextMessage = ({
           >
             {children}
             <Text fontSize='xs' color={grayTextColor}>
-              {timestampToHHMM(timestamp)}
+              {timestamp && timestampToHHMM(timestamp)}
             </Text>
           </Box>
           <BubbleIcon
@@ -85,7 +85,7 @@ const TextMessage = ({
         >
           {children}
           <Text fontSize='xs' color={grayTextColor}>
-            {timestamp}
+            {timestamp && timestampToHHMM(timestamp)}
           </Text>
         </Box>
       </Flex>
