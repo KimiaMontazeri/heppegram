@@ -7,7 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
-	"sync"
 )
 
 var upgrader = websocket.Upgrader{
@@ -16,89 +15,54 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-type WSHandler struct {
-	ChatRepo    repository.Chat
-	UserRepo    repository.User
-	MessageRepo repository.Message
-	WSManager   *WSManager
-}
+type (
+	WSHandler struct {
+		chatRepo    repository.Chat
+		userRepo    repository.User
+		messageRepo repository.Message
+		clients     map[*Client]bool
+		broadcast   chan MessageResponse // Inbound messages to be broadcasted
+		register    chan *Client         // Register requests from the clients
+		unregister  chan *Client         // Unregister requests from clients
+	}
 
-func NewWSHandler(chatRepo repository.Chat, userRepo repository.User, messageRepo repository.Message, wsManager *WSManager) *WSHandler {
+	Client struct {
+		hub  *WSHandler
+		conn *websocket.Conn
+		send chan MessageResponse
+		uid  uint
+	}
+)
+
+func NewWSHandler(chatRepo repository.Chat, userRepo repository.User, messageRepo repository.Message) *WSHandler {
 	return &WSHandler{
-		ChatRepo:    chatRepo,
-		UserRepo:    userRepo,
-		MessageRepo: messageRepo,
-		WSManager:   wsManager,
+		chatRepo:    chatRepo,
+		userRepo:    userRepo,
+		messageRepo: messageRepo,
+		broadcast:   make(chan MessageResponse),
+		register:    make(chan *Client),
+		unregister:  make(chan *Client),
+		clients:     make(map[*Client]bool),
 	}
 }
 
-type WSConn struct {
-	Conn *websocket.Conn
-	mu   sync.Mutex
-}
-
-type UserConn struct {
-	UserID uint
-	Conn   *websocket.Conn
-}
-
-type WSManager struct {
-	clients    map[uint]*WSConn
-	clientsMu  sync.RWMutex
-	register   chan *UserConn
-	unregister chan uint
-}
-
-func NewWSManager() *WSManager {
-	manager := &WSManager{
-		clients:    make(map[uint]*WSConn),
-		register:   make(chan *UserConn),
-		unregister: make(chan uint),
-	}
-	go manager.run()
-	return manager
-}
-
-func (manager *WSManager) run() {
+func (h *WSHandler) run() {
 	for {
 		select {
-		case userConn := <-manager.register:
-			manager.clientsMu.Lock()
-			manager.clients[userConn.UserID] = &WSConn{Conn: userConn.Conn}
-			manager.clientsMu.Unlock()
-		case userID := <-manager.unregister:
-			manager.clientsMu.Lock()
-			if conn, ok := manager.clients[userID]; ok {
-				delete(manager.clients, userID)
-				err := conn.Conn.Close()
-				if err != nil {
-					return
-				}
+		case client := <-h.register:
+			h.clients[client] = true
+		case client := <-h.unregister:
+			if _, ok := h.clients[client]; ok {
+				delete(h.clients, client)
+				close(client.send)
 			}
-			manager.clientsMu.Unlock()
-		}
-	}
-}
-
-func (h *WSHandler) SendMessageToChatMembers(chatID uint, senderID uint, messageResponse MessageResponse) {
-	userIDs, err := h.ChatRepo.GetUserIDsInChat(chatID)
-	if err != nil {
-		log.Printf("Error retrieving user IDs for chat %d: %v", chatID, err)
-		return
-	}
-
-	h.WSManager.clientsMu.RLock()
-	defer h.WSManager.clientsMu.RUnlock()
-
-	for _, userID := range userIDs {
-		if userID != senderID {
-			if wsConn, ok := h.WSManager.clients[userID]; ok {
-				wsConn.mu.Lock()
-				err := wsConn.Conn.WriteJSON(messageResponse)
-				wsConn.mu.Unlock()
-
-				if err != nil {
-					log.Printf("Error sending message to user %d: %v", userID, err)
+		case message := <-h.broadcast:
+			for client := range h.clients {
+				select {
+				case client.send <- message:
+				default:
+					close(client.send)
+					delete(h.clients, client)
 				}
 			}
 		}
@@ -123,7 +87,7 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "User not authenticated")
 	}
 
-	user, err := h.UserRepo.FindByUsername(authUsername)
+	user, err := h.userRepo.FindByUsername(authUsername)
 	if err != nil {
 		log.Println("Error fetching user details:", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error fetching user details")
@@ -132,8 +96,11 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "User not found")
 	}
 
-	h.WSManager.register <- &UserConn{UserID: user.ID, Conn: ws}
-	defer func() { h.WSManager.unregister <- user.ID }()
+	client := &Client{conn: ws, uid: user.ID}
+	h.clients[client] = true
+	h.register <- client
+
+	go client.writePump()
 
 	for {
 		var msgRequest MessageRequest
@@ -144,6 +111,7 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 			} else {
 				log.Printf("Read error: %v", err)
 			}
+			delete(h.clients, client)
 			break
 		}
 
@@ -159,7 +127,7 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 			Content:  msgRequest.Content,
 		}
 
-		err = h.MessageRepo.Create(newMessage)
+		err = h.messageRepo.Create(newMessage)
 		if err != nil {
 			log.Println("Error saving message to database:", err)
 			continue
@@ -180,8 +148,30 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 			Timestamp: newMessage.CreatedAt,
 		}
 
-		h.SendMessageToChatMembers(newMessage.ChatID, user.ID, messageResponse)
+		h.broadcast <- messageResponse
 	}
 
 	return nil
+}
+
+func (c *Client) writePump() {
+	defer func() {
+		c.conn.Close()
+	}()
+	for {
+		select {
+		case message, ok := <-c.send:
+			if !ok {
+				// The hub closed the channel.
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			err := c.conn.WriteJSON(message)
+			if err != nil {
+				log.Printf("Error sending message to user %d: %v", c.uid, err)
+				return
+			}
+		}
+	}
 }
