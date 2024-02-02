@@ -196,25 +196,28 @@ const ChatBox = ({ id }: ChatBoxProps) => {
             icon={<AttachmentIcon />}
             aria-label='attachment-icon'
             variant='ghost'
+            flexGrow={0.5}
           />
-          <form onSubmit={handleSendMessage}>
-            <InputGroup variant='filled'>
-              <Input
-                placeholder='Type a message...'
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-              />
-              <InputRightElement>
-                <IconButton
-                  icon={<ArrowForwardIcon />}
-                  variant='ghost'
-                  aria-label='send-icon'
-                  color='ButtonText'
-                  type='submit'
+          <Box flexGrow={4}>
+            <form onSubmit={handleSendMessage}>
+              <InputGroup variant='filled'>
+                <Input
+                  placeholder='Type a message...'
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
                 />
-              </InputRightElement>
-            </InputGroup>
-          </form>
+                <InputRightElement>
+                  <IconButton
+                    icon={<ArrowForwardIcon />}
+                    variant='ghost'
+                    aria-label='send-icon'
+                    color='ButtonText'
+                    type='submit'
+                  />
+                </InputRightElement>
+              </InputGroup>
+            </form>
+          </Box>
         </Flex>
       </Box>
     </Stack>
