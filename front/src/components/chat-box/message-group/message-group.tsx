@@ -1,25 +1,59 @@
-import { Avatar, Flex, IconButton, Stack } from '@chakra-ui/react';
+import { Avatar, Flex, IconButton, Stack, useToast } from '@chakra-ui/react';
 import TextMessage from '../text-message';
 import { MessageGroupProps } from './message-group.types';
 import { DeleteIcon } from '@chakra-ui/icons';
-import DeleteMessageModal from '../../delete-message-modal/';
+import { customFetch } from '../../../services/fetch';
+import useAppStore from '../../../store/app-store';
+import useChatsStore from '../../../store/chats-store';
 import { useState } from 'react';
 
 const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
-  const [deleteMessageModalVisibility, setDeleteMessageModalVisibility] =
-    useState(false);
+  // const [deleteMessageModalVisibility, setDeleteMessageModalVisibility] =
+  //   useState(false);
+  const selectedChat = useAppStore((state) => state.selectedChat);
+  const toast = useToast();
+  const [currentMessages, setCurrentMessages] = useState(messages);
+  const chats = useChatsStore((state) => state.chats);
+  const setChats = useChatsStore((state) => state.setChats);
+
+  const handleDeleteMessage = async (id: string | undefined) => {
+    const { ok } = await customFetch({
+      url: `/api/chats/${selectedChat}/messages/${id}`,
+      method: 'DELETE',
+    });
+
+    if (ok) {
+      toast({
+        title: 'Message deleted successfully.',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+      const filtered = messages.filter((message) => {
+        return message.id !== id;
+      });
+      setCurrentMessages(filtered);
+    } else {
+      toast({
+        title: 'An error occurred.',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
 
   if (isFromMe) {
     return (
       <>
-        <DeleteMessageModal
+        {/* <DeleteMessageModal
           isOpen={deleteMessageModalVisibility}
           onClose={() => setDeleteMessageModalVisibility(false)}
-        />
+        /> */}
         <Flex justifyContent='flex-end'>
           <Flex gap={2} align='flex-end'>
             <Stack pt={1} alignItems='flex-end' pb={1}>
-              {messages.map((message, index) => (
+              {currentMessages.map((message, index) => (
                 <Flex align='center'>
                   <IconButton
                     icon={<DeleteIcon />}
@@ -29,7 +63,7 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
                     isRound
                     aria-label='delete-message'
                     mr={1}
-                    onClick={() => setDeleteMessageModalVisibility(true)}
+                    onClick={() => handleDeleteMessage(message.id)}
                   />
                   <TextMessage
                     direction='start'
