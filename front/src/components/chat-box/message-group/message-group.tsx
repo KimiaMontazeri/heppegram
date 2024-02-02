@@ -4,12 +4,13 @@ import { MessageGroupProps } from './message-group.types';
 import { DeleteIcon } from '@chakra-ui/icons';
 import { customFetch } from '../../../services/fetch';
 import useAppStore from '../../../store/app-store';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
   const selectedChat = useAppStore((state) => state.selectedChat);
   const toast = useToast();
   const [currentMessages, setCurrentMessages] = useState(messages);
+  console.log('message-group', { messages });
 
   const handleDeleteMessage = async (id: string | undefined) => {
     const { ok } = await customFetch({
@@ -37,6 +38,10 @@ const MessageGroup = ({ isFromMe, from, messages }: MessageGroupProps) => {
       });
     }
   };
+
+  useEffect(() => {
+    setCurrentMessages(messages);
+  }, [messages]);
 
   if (isFromMe) {
     return (

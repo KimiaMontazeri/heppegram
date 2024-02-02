@@ -26,12 +26,12 @@ import useUserStore from '../../store/user-store';
 import { timestampToHHMM } from '../../utils/time';
 import useAppStore from '../../store/app-store';
 import { getNameFromChat } from '../../utils/chat';
-import useChatsStore, { Chat } from '../../store/chats-store';
+import type { Chat } from '../../store/chats-store';
 
-const ChatList = ({ selectedChatId }: ChatListProps) => {
+const ChatList = ({ selectedChatId, chats }: ChatListProps) => {
+  console.log('chat-list');
   const username = useUserStore((state) => state.user?.username);
   const setSelectedChat = useAppStore((state) => state.setSelectedChat);
-  const chats = useChatsStore((state) => state.chats);
 
   const [searchContactModalOpen, setSearchContactModalOpen] = useState(false);
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);

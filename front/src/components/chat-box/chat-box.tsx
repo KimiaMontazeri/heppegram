@@ -78,7 +78,7 @@ const ChatBox = ({ id }: ChatBoxProps) => {
   useEffect(() => {
     // 👇️ scroll to bottom every time messages change
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []); // TODO: every time we get a new message, we should run this effect
+  }, [id]); // TODO: every time we get a new message, we should run this effect
 
   const getChatData = async () => {
     const { ok, body } = await customFetch({
@@ -91,6 +91,11 @@ const ChatBox = ({ id }: ChatBoxProps) => {
       setChatImage(getImageFromChat(body, username));
       setMessages(body.messages);
       setSelectedChatData(body);
+
+      const receivedMessages = body.messages as Message[];
+      const sorted = receivedMessages.sort((a, b) => b.timestamp - a.timestamp);
+      // const reversed = sorted.reverse();
+      setGroupedMessages(groupMessagesBySender(sorted));
     } else {
       toast({
         title: 'An error occurred while fetching chat data.',
@@ -111,19 +116,19 @@ const ChatBox = ({ id }: ChatBoxProps) => {
     setMessageText('');
   };
 
-  useEffect(() => {
-    // TODO: fix the sorting!
-    console.log({ messages });
-    const sorted = messages.sort((a, b) => {
-      console.log(a.timestamp, b.timestamp);
-      return b.timestamp - a.timestamp;
-    });
-    const reversed = sorted.reverse();
-    setGroupedMessages(groupMessagesBySender(reversed));
-  }, [messages]);
+  // useEffect(() => {
+  //   // TODO: fix the sorting!
+  //   // console.log({ messages });
+  //   const sorted = messages.sort((a, b) => b.timestamp - a.timestamp);
+  //   // const reversed = sorted.reverse();
+  //   setGroupedMessages(groupMessagesBySender(sorted));
+  // }, [messages]);
 
   useEffect(() => {
-    setMessages([...messages, lastJsonMessage]);
+    if (lastJsonMessage?.chatID === id) {
+      setMessages([...messages, lastJsonMessage]);
+      setGroupedMessages(groupMessagesBySender([...messages, lastJsonMessage]));
+    }
   }, [lastJsonMessage]);
 
   useEffect(() => {

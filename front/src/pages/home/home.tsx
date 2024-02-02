@@ -83,6 +83,7 @@ function Home() {
           chatsTemp[foundChatIndex] = foundChat;
           console.log({ foundChat });
           setChats(chatsTemp);
+          setChatList(chatsTemp);
         } else if (user) {
           chatsTemp?.push({
             id: chatID,
@@ -95,6 +96,7 @@ function Home() {
             unreadMessageCount: 1,
           });
           setChats(chatsTemp);
+          setChatList(chatsTemp);
         }
       }
     }
