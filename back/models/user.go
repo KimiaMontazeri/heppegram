@@ -13,4 +13,5 @@ type User struct {
 	Password  string `gorm:"type:varchar(100)"`
 	Image     string `gorm:"type:varchar(100)"`
 	Bio       string `gorm:"type:text"`
+	Status    uint   `gorm:"default:0"`
 }

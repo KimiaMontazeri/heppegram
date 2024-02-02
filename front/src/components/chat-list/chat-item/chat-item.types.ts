@@ -6,4 +6,5 @@ export type ChatItemProps = {
   lastMessageTimestamp?: string;
   unreadMessageCount?: number;
   selected?: boolean;
+  status?: number;
 };

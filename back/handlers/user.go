@@ -24,6 +24,7 @@ type UserResponseDTO struct {
 	Phone     string `json:"phone"`
 	Username  string `json:"username"`
 	Bio       string `json:"bio"`
+	Status    uint   `json:"status"`
 }
 
 type UserRegisterDTO struct {
@@ -160,6 +161,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	}
 	user.Image = userUpdateDTO.Image
 	user.Bio = userUpdateDTO.Bio
+	user.Status = uint(0)
 
 	if err := h.UserRepo.Update(user); err != nil {
 		log.Printf("error updating user: %s", err.Error())

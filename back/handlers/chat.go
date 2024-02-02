@@ -83,6 +83,7 @@ func (h *ChatHandler) CreateChat(c echo.Context) error {
 			Phone:     user.Phone,
 			Username:  user.Username,
 			Bio:       user.Bio,
+			Status:    user.Status,
 		}
 	}
 
@@ -134,6 +135,7 @@ func (h *ChatHandler) GetChats(c echo.Context) error {
 				Phone:     user.Phone,
 				Username:  user.Username,
 				Bio:       user.Bio,
+				Status:    user.Status,
 			}
 
 			messageResponse.ID = message.ID
@@ -157,6 +159,7 @@ func (h *ChatHandler) GetChats(c echo.Context) error {
 				Phone:     user.Phone,
 				Username:  user.Username,
 				Bio:       user.Bio,
+				Status:    user.Status,
 			}
 			chatPreviewDTO.People = append(chatPreviewDTO.People, userDTO)
 		}
@@ -222,6 +225,7 @@ func (h *ChatHandler) GetChat(c echo.Context) error {
 			Phone:     sender.Phone,
 			Username:  sender.Username,
 			Bio:       sender.Bio,
+			Status:    sender.Status,
 		}
 
 		MessageResponses[i] = MessageResponse{
@@ -242,6 +246,7 @@ func (h *ChatHandler) GetChat(c echo.Context) error {
 			Phone:     user.Phone,
 			Username:  user.Username,
 			Bio:       user.Bio,
+			Status:    user.Status,
 		}
 	}
 

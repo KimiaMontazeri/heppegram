@@ -1,5 +1,6 @@
 import {
   Avatar,
+  AvatarBadge,
   Badge,
   Flex,
   Stack,
@@ -15,6 +16,7 @@ const ChatItem = ({
   lastMessageTimestamp,
   unreadMessageCount,
   selected = false,
+  status = 0,
 }: ChatItemProps) => {
   const selectedBgColor = useColorModeValue('purple.50', 'purple.800');
   const hoverColor = useColorModeValue('purple.50', 'purple.800');
@@ -32,7 +34,13 @@ const ChatItem = ({
       }}
     >
       <Flex alignItems='center' gap={2}>
-        <Avatar name={name} src={photoUrl} />
+        <Avatar name={name} src={photoUrl}>
+          {status === 1 ? (
+            <AvatarBadge boxSize='1em' bg='green.500' />
+          ) : (
+            <AvatarBadge boxSize='1em' bg='red.500' />
+          )}
+        </Avatar>
         <Stack alignItems='flex-start' gap={0}>
           <Text>{name}</Text>
           <Text fontSize='sm' color={useColorModeValue('gray.500', 'gray.300')}>

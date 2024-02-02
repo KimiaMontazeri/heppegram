@@ -8,6 +8,7 @@ export type User = {
   image?: string;
   phone?: string;
   bio?: string;
+  status?: number;
 };
 
 interface UserState {

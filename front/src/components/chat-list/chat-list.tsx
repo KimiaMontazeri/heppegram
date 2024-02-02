@@ -61,6 +61,20 @@ const ChatList = ({ selectedChatId, chats }: ChatListProps) => {
     return 0;
   };
 
+  const getStatus = (chat: Chat) => {
+    const foundChat = chats?.find((item) => item.id === chat.id);
+    if (foundChat) {
+      const { people } = foundChat;
+      const user = people?.find((person) => person.username !== username);
+      if (user) {
+        console.log('status: ', user.status);
+        return user.status;
+      }
+    }
+
+    return 0;
+  };
+
   return (
     <Box px={4}>
       <SearchContactModal
@@ -138,6 +152,7 @@ const ChatList = ({ selectedChatId, chats }: ChatListProps) => {
                   : undefined
               }
               unreadMessageCount={getUnreadMessageCount(chat)}
+              status={getStatus(chat)}
             />
           </Box>
         ))

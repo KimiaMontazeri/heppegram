@@ -142,7 +142,14 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 	}
 
 	h.WSManager.register <- &UserConn{UserID: user.ID, Conn: ws}
-	defer func() { h.WSManager.unregister <- user.ID }()
+	defer func() {
+		h.WSManager.unregister <- user.ID
+		user.Status = uint(0)
+		err := h.UserRepo.Update(user)
+		if err != nil {
+			log.Println("Failed to set status online")
+		}
+	}()
 
 	time.Sleep(200 * time.Millisecond)
 
@@ -150,7 +157,14 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 
 	for {
 		var msgRequest MessageRequest
-		err := ws.ReadJSON(&msgRequest)
+
+		user.Status = uint(1)
+		err := h.UserRepo.Update(user)
+		if err != nil {
+			return err
+		}
+
+		err = ws.ReadJSON(&msgRequest)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("Websocket error: %v", err)
@@ -188,6 +202,7 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 				Phone:     user.Phone,
 				Username:  user.Username,
 				Bio:       user.Bio,
+				Status:    user.Status,
 			},
 			Content:   newMessage.Content,
 			Timestamp: newMessage.CreatedAt,
